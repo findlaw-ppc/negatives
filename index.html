@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Law Firm Negative Keyword Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --accent: #4f8cff;
+      --text: #e6ecff;
+      --muted: #a8b2d1;
+      --chip: #1b2550;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --cyan: #22d3ee;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 500px at 20% -10%, #14204a 0%, rgba(20,32,74,0) 50%),
+                  radial-gradient(1400px 600px at 120% 10%, #162a69 0%, rgba(22,42,105,0) 55%),
+                  var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      line-height: 1.35;
+    }
+    header {
+      padding: 24px 18px 8px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .title {
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 12px 18px 28px;
+    }
+    @media (min-width: 960px) {
+      .grid { grid-template-columns: 360px 1fr; }
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .card h3 {
+      margin: 2px 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea { min-height: 180px; resize: vertical; }
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,140,255,0.15);
+    }
+    .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 640px) {
+      .row-2 { grid-template-columns: 1fr 1fr; }
+      .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .btn {
+      background: linear-gradient(180deg, #5b8fff, #3f73ef);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.06s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      box-shadow: 0 8px 24px rgba(79,140,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--chip);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 999px;
+      color: var(--text);
+      font-size: 12px;
+    }
+    .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .chip.green .dot { background: var(--green); }
+    .chip.yellow .dot { background: var(--yellow); }
+    .chip.red .dot { background: var(--red); }
+    .chip.cyan .dot { background: var(--cyan); }
+    .section {
+      margin-top: 6px;
+      border-top: 1px dashed rgba(255,255,255,0.12);
+      padding-top: 10px;
+    }
+    .out {
+      width: 100%;
+      min-height: 140px;
+      white-space: pre-wrap;
+      background: rgba(8,10,24,0.6);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      color: #d9e5ff;
+    }
+    details {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    details summary {
+      cursor: pointer;
+      color: var(--muted);
+      user-select: none;
+      font-weight: 600;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .statline {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 8px 0 6px;
+    }
+    .toggle {
+      display: inline-flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted);
+    }
+    .toggle input { transform: translateY(1px); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+    }
+    .legend .chip { font-weight: 600; }
+    .footer-note {
+      text-align: center; color: var(--muted); font-size: 12px; padding: 16px 0 24px;
+    }
+    .kbd { font-family: ui-monospace, monospace; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); padding: 1px 6px; border-radius: 6px; }
+    .pill {
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .sr {
+      position: absolute !important;
+      width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="container">
+    <div class="title">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M4 18V6a2 2 0 0 1 2-2h9l5 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" stroke="#4f8cff" stroke-width="1.5"/>
+        <path d="M15 4v4a1 1 0 0 0 1 1h4" stroke="#4f8cff" stroke-width="1.5"/>
+      </svg>
+      Law Firm Negative Keyword Generator
+      <span class="badge">Google Ads | Phrase-Match Negatives</span>
+    </div>
+    <div class="subtitle">
+      Paste your Search Term Report, analyze intent, and export a clean list of phrase-match negatives: competitors, low-value admin queries, and non-practice-area terms.
+    </div>
+  </header>
+
+  <main class="container grid">
+    <!-- LEFT: SETTINGS -->
+    <section class="card">
+      <h3>Campaign Context</h3>
+      <div class="row">
+        <div>
+          <label for="firmName">Law firm name (include variations)</label>
+          <input id="firmName" type="text" placeholder="e.g., Smith & Jones, The Smith Law Firm, Smith Law" />
+          <div class="hint">Comma-separated. We’ll protect your brand terms from being negated.</div>
+        </div>
+      </div>
+      <div class="row row-2 mt-12">
+        <div>
+          <label for="locations">Office locations</label>
+          <input id="locations" type="text" placeholder="e.g., Austin, Dallas, San Antonio" />
+          <div class="hint">Optional. Helps with city/agency noise patterns.</div>
+        </div>
+        <div>
+          <label for="practiceTemplate">Practice area template</label>
+          <select id="practiceTemplate">
+            <option value="">-- Select (optional) --</option>
+            <option value="personalInjury">Personal Injury</option>
+            <option value="familyLaw">Family Law</option>
+            <option value="criminalDefense">Criminal Defense</option>
+            <option value="immigration">Immigration</option>
+            <option value="employment">Employment Law</option>
+            <option value="estate">Estate Planning / Probate</option>
+            <option value="bankruptcy">Bankruptcy</option>
+            <option value="business">Business / Corporate</option>
+          </select>
+          <div class="hint">Auto-fills include + out-of-scope detection.</div>
+        </div>
+      </div>
+      <div class="row mt-12">
+        <div>
+          <label for="includeKeywords">In-scope practice keywords (include)</label>
+          <textarea id="includeKeywords" placeholder="Comma-separated. e.g., personal injury, accident lawyer, car accident, slip and fall, wrongful death"></textarea>
+          <div class="hint">We’ll treat any term containing one of these as in-scope (not a negative).</div>
+        </div>
+      </div>
+      <div class="row mt-12">
+        <div>
+          <label for="excludeKeywords">Out-of-scope practice keywords (exclude)</label>
+          <textarea id="excludeKeywords" placeholder="Auto-filled from template. Add any other practices you do not serve."></textarea>
+          <div class="hint">If a term includes any of these, we’ll recommend a negative for that phrase.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Heuristics & Filters</h3>
+        <div class="row row-2">
+          <div>
+            <label>Competitor/Directory brands (preloaded)</label>
+            <div class="small">Avvo, Justia, FindLaw, Super Lawyers, Martindale, Nolo, Lawyers.com, LegalZoom, Rocket Lawyer, Yelp, Thumbtack, Angi, UpCounsel, Best Lawyers</div>
+          </div>
+          <div>
+            <label>Administrative noise (preloaded)</label>
+            <div class="small">address, phone number, fax, directions, map, hours, login, portal, billing, payment, forms, PDF, application, jobs, careers, DMV, jail, inmate search, court, clerk, jury duty, legal aid, pro bono, free</div>
+          </div>
+        </div>
+        <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
+          <label class="toggle"><input id="toggleCompetitors" type="checkbox" checked /> Competitors</label>
+          <label class="toggle"><input id="toggleAdmin" type="checkbox" checked /> Low-value admin</label>
+          <label class="toggle"><input id="toggleNonPA" type="checkbox" checked /> Non-practice-area</label>
+          <label class="toggle"><input id="toggleKeepBranded" type="checkbox" checked /> Never negate my brand</label>
+          <label class="toggle"><input id="toggleStrict" type="checkbox" /> Strict non-PA (negate full unmatched queries)</label>
+        </div>
+      </div>
+
+      <details class="mt-12">
+        <summary>How it works (expand)</summary>
+        <ul class="small">
+          <li>Parses your Search Term Report (CSV/TSV or plain lines). We auto-pick the first text column.</li>
+          <li>Flags competitors via brand patterns and major legal directories/aggregators.</li>
+          <li>Flags low-value admin intent (e.g., address, hours, jobs, login, court/DMV/jail lookups, bill pay).</li>
+          <li>Flags non-practice-area if the term lacks any “include” keywords or matches “exclude” practice areas.</li>
+          <li>Outputs phrase-match negatives (quoted), deduped, with category breakdowns and copy/export.</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- RIGHT: INPUT + OUTPUT -->
+    <section class="card">
+      <h3>Search Term Report</h3>
+      <label for="terms">Paste terms (one per line, CSV/TSV OK)</label>
+      <textarea id="terms" placeholder="Paste your Search Term Report here..."></textarea>
+      <div class="btn-row mt-8">
+        <button class="btn" id="analyzeBtn">Analyze & Generate Negatives</button>
+        <button class="btn secondary" id="sampleBtn">Load Sample</button>
+        <button class="btn secondary" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="legend">
+        <span class="chip green"><span class="dot"></span> Competitors</span>
+        <span class="chip yellow"><span class="dot"></span> Admin</span>
+        <span class="chip red"><span class="dot"></span> Non-PA</span>
+        <span class="chip cyan"><span class="dot"></span> All (deduped)</span>
+      </div>
+
+      <div class="section">
+        <div class="statline" id="stats"></div>
+        <div class="row row-2 mt-8">
+          <div>
+            <label>Master negative list (phrase-match)</label>
+            <textarea id="outAll" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outAll">Copy all</button>
+              <button class="btn secondary" data-download="#outAll" data-name="negatives-all.txt">Download</button>
+              <span class="pill"><span class="dot" style="background:var(--cyan)"></span> Deduped</span>
+            </div>
+          </div>
+          <div>
+            <label>Competitors</label>
+            <textarea id="outCompetitors" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outCompetitors">Copy</button>
+              <button class="btn secondary" data-download="#outCompetitors" data-name="negatives-competitors.txt">Download</button>
+              <span class="pill"><span class="dot" style="background:var(--green)"></span> Brand/Directory</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-2 mt-8">
+          <div>
+            <label>Low-value administrative</label>
+            <textarea id="outAdmin" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outAdmin">Copy</button>
+              <button class="btn secondary" data-download="#outAdmin" data-name="negatives-admin.txt">Download</button>
+              <span class="pill"><span class="dot" style="background:var(--yellow)"></span> Admin intent</span>
+            </div>
+          </div>
+          <div>
+            <label>Non-practice-area</label>
+            <textarea id="outNonPA" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outNonPA">Copy</button>
+              <button class="btn secondary" data-download="#outNonPA" data-name="negatives-nonpa.txt">Download</button>
+              <span class="pill"><span class="dot" style="background:var(--red)"></span> Out of scope</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-note container">
+    Tip: Tune the include/exclude lists for your vertical. Use the Strict toggle to negate full unmatched queries.
+  </div>
+
+  <script>
+    // Utility helpers
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    // Preloaded dictionaries
+    const DIR_AGG_BRANDS = [
+      "avvo","justia","findlaw","super lawyers","martindale","nolo","lawyers.com","best lawyers",
+      "legalzoom","rocket lawyer","upcounsel","thumbtack","angi","angie's list","yelp","superlawyers",
+      "attorneys.com","legalmatch","hg.org","lawinfo","no win no fee" // UK style phrase
+    ];
+
+    const ADMIN_PHRASES = [
+      "address","phone number","fax","directions","map","parking","hours","opening hours","closing time",
+      "email","contact number","contact info","contact information","login","portal","intranet","portal login",
+      "careers","jobs","job","internship","salary","benefits","hiring","glassdoor","indeed",
+      "pay","payment","online payment","bill pay","billing","invoice","coupon","discount","promo code",
+      "forms","form","pdf","template","sample","application","apply",
+      "court","county clerk","clerk of court","probate court","family court","small claims","traffic court",
+      "dmv","dps","bmv","rmv","secretary of state","sos","dpss",
+      "sheriff","police","jail","inmate","inmate search","warrant search","jail roster",
+      "jury duty","juror","public defender","legal aid","pro bono","free legal advice","free lawyer","cheap lawyer"
+    ];
+
+    // Practice area templates
+    const PRACTICE_TEMPLATES = {
+      personalInjury: {
+        include: [
+          "personal injury","injury lawyer","injury attorney","accident lawyer","accident attorney",
+          "car accident","auto accident","motor vehicle accident","mva","truck accident","semi truck accident",
+          "18 wheeler accident","motorcycle accident","uber accident","lyft accident","rideshare accident",
+          "bicycle accident","pedestrian accident","slip and fall","trip and fall","premises liability",
+          "wrongful death","dog bite","insurance claim","catastrophic injury","brain injury","spinal cord",
+          "burn injury","construction accident"
+        ],
+        exclude: [
+          "immigration","visa","citizenship","green card",
+          "divorce","family law","child custody","child support","alimony","paternity","adoption","prenup",
+          "criminal","dui","dwi","assault","battery","domestic violence","theft","burglary","expungement",
+          "bankruptcy","chapter 7","chapter 13","debt relief","foreclosure",
+          "employment","wrongful termination","discrimination","harassment","overtime","wage theft","severance",
+          "estate planning","probate","will","trust","power of attorney","elder law",
+          "real estate","landlord tenant","ip","patent","trademark","copyright","tax","business","corporate",
+          "lemon law","ssd","ssi","workers comp","worker's comp","workers' comp","medical malpractice"
+        ]
+      },
+      familyLaw: {
+        include: [
+          "family law","divorce","child custody","child support","alimony","spousal support","paternity",
+          "adoption","prenup","prenuptial agreement","postnuptial","guardianship","modification","parenting plan"
+        ],
+        exclude: [
+          "immigration","visa","citizenship","green card",
+          "criminal","dui","dwi","assault","domestic violence defense","theft","burglary","expungement",
+          "bankruptcy","chapter 7","chapter 13","debt relief",
+          "employment","wrongful termination","discrimination","harassment",
+          "estate planning","probate","will","trust","elder law",
+          "personal injury","car accident","slip and fall","wrongful death",
+          "business","corporate","real estate","landlord tenant","tax","ip","patent","trademark","copyright"
+        ]
+      },
+      criminalDefense: {
+        include: [
+          "criminal defense","criminal lawyer","defense attorney","dui","dwi","drug possession",
+          "assault","battery","domestic violence","theft","burglary","expungement","record sealing",
+          "felony","misdemeanor","gun charge","probation violation","sex offense","white collar"
+        ],
+        exclude: [
+          "immigration","visa","green card","citizenship",
+          "divorce","child custody","family law","alimony",
+          "bankruptcy","chapter 7","chapter 13","debt relief",
+          "estate planning","probate","will","trust",
+          "personal injury","car accident","slip and fall","wrongful death",
+          "employment","business","corporate","real estate","landlord tenant","tax","ip","patent","trademark","copyright"
+        ]
+      },
+      immigration: {
+        include: [
+          "immigration","immigration lawyer","green card","visa","citizenship","naturalization",
+          "asylum","deportation","removal defense","h1b","k1","i-130","i-485","uscis","work permit","ead"
+        ],
+        exclude: [
+          "divorce","family law","child custody",
+          "criminal","dui","dwi","assault","expungement",
+          "bankruptcy","chapter 7","chapter 13",
+          "estate planning","probate","will","trust",
+          "personal injury","car accident","slip and fall",
+          "employment","wrongful termination",
+          "real estate","landlord tenant","tax","ip","business","corporate"
+        ]
+      },
+      employment: {
+        include: [
+          "employment lawyer","employment attorney","wrongful termination","discrimination","harassment",
+          "overtime","wage theft","unpaid wages","non-compete","severance","retaliation","fmla"
+        ],
+        exclude: [
+          "immigration","green card","visa",
+          "divorce","family law","child custody",
+          "criminal","dui","expungement",
+          "bankruptcy","chapter 7","chapter 13",
+          "estate planning","probate","trust","will",
+          "personal injury","car accident","slip and fall",
+          "business","corporate","real estate","landlord tenant","tax","ip"
+        ]
+      },
+      estate: {
+        include: [
+          "estate planning","probate","will","trust","power of attorney","living will","advance directive",
+          "elder law","special needs trust","executor","trust administration"
+        ],
+        exclude: [
+          "immigration","visa","green card",
+          "divorce","family law","child custody",
+          "criminal","dui","expungement",
+          "bankruptcy","chapter 7","chapter 13",
+          "personal injury","car accident","slip and fall",
+          "employment","wrongful termination",
+          "business","corporate","real estate","landlord tenant","tax","ip"
+        ]
+      },
+      bankruptcy: {
+        include: [
+          "bankruptcy","chapter 7","chapter 13","debt relief","debt attorney","foreclosure defense",
+          "wage garnishment","creditor harassment"
+        ],
+        exclude: [
+          "immigration","visa",
+          "divorce","family law","child custody",
+          "criminal","dui","expungement",
+          "estate planning","probate","trust","will",
+          "personal injury","car accident","slip and fall",
+          "employment","wrongful termination",
+          "business","corporate","real estate","landlord tenant","tax","ip"
+        ]
+      },
+      business: {
+        include: [
+          "business lawyer","corporate lawyer","contract lawyer","llc formation","incorporation",
+          "mergers","acquisitions","startup lawyer","general counsel","commercial litigation"
+        ],
+        exclude: [
+          "immigration","visa",
+          "divorce","family law","child custody",
+          "criminal","dui","expungement",
+          "estate planning","probate","trust","will",
+          "personal injury","car accident","slip and fall",
+          "employment","wrongful termination",
+          "real estate","landlord tenant","tax","ip"
+        ]
+      }
+    };
+
+    // Elements
+    const el = {
+      firmName: $("#firmName"),
+      locations: $("#locations"),
+      practiceTemplate: $("#practiceTemplate"),
+      includeKeywords: $("#includeKeywords"),
+      excludeKeywords: $("#excludeKeywords"),
+      terms: $("#terms"),
+      analyzeBtn: $("#analyzeBtn"),
+      sampleBtn: $("#sampleBtn"),
+      clearBtn: $("#clearBtn"),
+      outAll: $("#outAll"),
+      outCompetitors: $("#outCompetitors"),
+      outAdmin: $("#outAdmin"),
+      outNonPA: $("#outNonPA"),
+      stats: $("#stats"),
+      toggles: {
+        competitors: $("#toggleCompetitors"),
+        admin: $("#toggleAdmin"),
+        nonpa: $("#toggleNonPA"),
+        keepBranded: $("#toggleKeepBranded"),
+        strict: $("#toggleStrict")
+      }
+    };
+
+    // Template injection
+    el.practiceTemplate.addEventListener("change", () => {
+      const key = el.practiceTemplate.value;
+      if (!key || !PRACTICE_TEMPLATES[key]) return;
+      const t = PRACTICE_TEMPLATES[key];
+      el.includeKeywords.value = t.include.join(", ");
+      el.excludeKeywords.value = t.exclude.join(", ");
+    });
+
+    // CSV-ish parsing
+    function parseLines(raw) {
+      if (!raw) return [];
+      const out = [];
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (!lines.length) return out;
+      // If first line looks like a header, remember columns
+      const sep = detectSeparator(lines);
+      let headers = null;
+      if (sep) {
+        const first = splitRow(lines[0], sep).map(s => s.toLowerCase());
+        const headerHits = first.some(h => /search\s*term/.test(h) || /keyword/.test(h));
+        if (headerHits) headers = first;
+      }
+      for (let i = headers ? 1 : 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!sep) {
+          out.push(line);
+          continue;
+        }
+        const cols = splitRow(line, sep);
+        if (!cols.length) continue;
+        // choose first texty col
+        let chosen = "";
+        if (headers) {
+          const stIdx = headers.findIndex(h => /search\s*term/.test(h));
+          if (stIdx >= 0 && cols[stIdx]) chosen = cols[stIdx];
+        }
+        if (!chosen) {
+          chosen = cols.find(c => /\D/.test(c)) || cols[0] || "";
+        }
+        chosen = chosen.trim();
+        if (chosen) out.push(chosen);
+      }
+      return out;
+    }
+
+    function detectSeparator(lines) {
+      const sample = lines.slice(0, Math.min(5, lines.length));
+      const counts = { ",": 0, "\t": 0, ";": 0, "|": 0 };
+      sample.forEach(l => {
+        Object.keys(counts).forEach(k => { counts[k] += (l.split(k).length - 1); });
+      });
+      const best = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+      return best && best[1] > 0 ? best[0] : null;
+    }
+
+    function splitRow(line, sep) {
+      if (!sep) return [line];
+      // Very light CSV/TSV split (no nested quotes beyond first field is fine)
+      const parts = [];
+      let cur = "";
+      let inQ = false;
+      for (let i=0; i<line.length; i++) {
+        const ch = line[i];
+        if (ch === '"' && line[i-1] !== "\\") {
+          inQ = !inQ;
+          continue;
+        }
+        if (ch === sep && !inQ) {
+          parts.push(cur.trim());
+          cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      if (cur.length) parts.push(cur.trim());
+      return parts;
+    }
+
+    // Normalization
+    const norm = s => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+    function csvToList(s) {
+      return (s || "")
+        .split(",")
+        .map(x => norm(x))
+        .filter(Boolean);
+    }
+
+    function words(s) {
+      return norm(s).split(/\s+/).filter(Boolean);
+    }
+
+    // Matching helpers
+    function containsPhrase(term, phrase) {
+      term = " " + norm(term) + " ";
+      phrase = " " + norm(phrase) + " ";
+      return term.includes(phrase);
+    }
+
+    function anyMatch(term, arr) {
+      term = " " + norm(term) + " ";
+      return arr.find(p => term.includes(" " + norm(p) + " "));
+    }
+
+    function anyRegex(term, regexes) {
+      const t = norm(term);
+      for (const r of regexes) {
+        const m = t.match(r);
+        if (m) return m;
+      }
+      return null;
+    }
+
+    function dedupeQuotes(list) {
+      const seen = new Set();
+      const out = [];
+      for (let item of list) {
+        const q = toPhrase(item);
+        const key = q.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push(q);
+        }
+      }
+      return out;
+    }
+
+    function toPhrase(kw) {
+      kw = norm(kw).replace(/["]+/g, "");
+      // Ensure it's not empty
+      if (!kw) return "";
+      // Quote always for explicit phrase-match clarity
+      return `"${kw}"`;
+    }
+
+    // Brand pattern extraction (competitors)
+    function extractCompetitorBrandTokens(term, myBrands) {
+      const t = norm(term);
+      const hits = new Set();
+
+      // 1) Legal directories / aggregators exact phrases
+      for (const b of DIR_AGG_BRANDS) {
+        if (containsPhrase(t, b)) hits.add(b);
+      }
+
+      // 2) Common law brand patterns
+      // e.g., "law offices of smith", "smith law", "smith & jones", "smith associates", "jones legal group", "smith llp"
+      const patterns = [
+        /\blaw offices of ([a-z][a-z\s&'-]{2,})\b/i,
+        /\b([a-z][a-z&'\-]{2,}\s+(?:law|legal|attorneys?|lawyers?|trial|injury|group|associates))\b/i,
+        /\b([a-z][a-z&'\-]{2,}\s*&\s*[a-z][a-z&'\-]{2,})\b/i,
+        /\b([a-z][a-z&'\-]{2,}\s+(?:llp|pllc|pc|p\.a\.|pa))\b/i
+      ];
+      const rxHits = [];
+      for (const rx of patterns) {
+        const m = t.match(rx);
+        if (m && m[1]) rxHits.push(m[1]);
+      }
+      rxHits.forEach(h => hits.add(norm(h)));
+
+      // 3) If a brand-like token is present with "law firm" / "law office"
+      const pattern2 = [
+        /\b([a-z][a-z&'\-]{2,}\s+(?:law firm|law office|law offices))\b/i
+      ];
+      for (const rx of pattern2) {
+        const m = t.match(rx);
+        if (m && m[1]) hits.add(norm(m[1]));
+      }
+
+      // Remove anything that matches my own brand variants
+      const mySet = new Set(myBrands.map(norm));
+      const filtered = Array.from(hits).filter(h => !mySet.has(h));
+      return filtered;
+    }
+
+    function isMyBrand(term, myBrands) {
+      const t = " " + norm(term) + " ";
+      for (const b of myBrands) {
+        const needle = " " + norm(b) + " ";
+        if (t.includes(needle)) return true;
+      }
+      return false;
+    }
+
+    // Extract admin intent phrases present in term
+    function extractAdminPhrases(term) {
+      const t = " " + norm(term) + " ";
+      const hits = [];
+      for (const p of ADMIN_PHRASES) {
+        const needle = " " + norm(p) + " ";
+        if (t.includes(needle)) hits.push(p);
+      }
+      // Some combos (e.g., "phone", "number" separately)
+      if (/\b(phone|call|telephone)\b/.test(t) && /\b(number|no\.?)\b/.test(t)) {
+        hits.push("phone number");
+      }
+      if (/\b(bill|pay|payment)\b/.test(t) && /\b(online|portal)?\b/.test(t)) {
+        hits.push("online payment");
+      }
+      return Array.from(new Set(hits));
+    }
+
+    // Practice area matching
+    function findIncludes(term, includeList) {
+      const t = " " + norm(term) + " ";
+      const hits = [];
+      for (const p of includeList) {
+        const needle = " " + norm(p) + " ";
+        if (t.includes(needle)) hits.push(p);
+      }
+      return hits;
+    }
+
+    function findExcludes(term, excludeList) {
+      const t = " " + norm(term) + " ";
+      const hits = [];
+      for (const p of excludeList) {
+        const needle = " " + norm(p) + " ";
+        if (t.includes(needle)) hits.push(p);
+      }
+      return hits;
+    }
+
+    // Build negatives by category
+    function buildNegatives(inputTerms, cfg) {
+      const competitorNegs = [];
+      const adminNegs = [];
+      const nonPANegs = [];
+
+      const myBrands = csvToList(cfg.firmName);
+      const includeList = csvToList(cfg.includeKeywords);
+      let excludeList = csvToList(cfg.excludeKeywords);
+
+      // Add directory brands to competitor negs when encountered
+      for (const raw of inputTerms) {
+        const term = norm(raw);
+        if (!term) continue;
+
+        const branded = isMyBrand(term, myBrands);
+
+        // Competitors
+        if (cfg.flags.competitors) {
+          const compTokens = extractCompetitorBrandTokens(term, myBrands);
+          // If term contains directory brand or brand-like other firm, add that token (not full query)
+          for (const token of compTokens) {
+            if (cfg.flags.keepBranded && branded) continue;
+            competitorNegs.push(token);
+          }
+        }
+
+        // Admin
+        if (cfg.flags.admin) {
+          const aHits = extractAdminPhrases(term);
+          for (const a of aHits) {
+            // Avoid negating if it also includes my brand and toggle is on
+            if (cfg.flags.keepBranded && branded) continue;
+            adminNegs.push(a);
+          }
+        }
+
+        // Non-practice-area
+        if (cfg.flags.nonpa) {
+          const incHits = includeList.length ? findIncludes(term, includeList) : [];
+          const excHits = excludeList.length ? findExcludes(term, excludeList) : [];
+          let shouldNegate = false;
+          const phrasesToAdd = [];
+
+          if (excHits.length) {
+            shouldNegate = true;
+            phrasesToAdd.push(...excHits);
+          }
+
+          // If no include hit and strict mode, negate full term (unless branded)
+          if (!incHits.length && !excHits.length && cfg.flags.strict) {
+            if (!(cfg.flags.keepBranded && branded)) {
+              shouldNegate = true;
+              phrasesToAdd.push(term);
+            }
+          }
+
+          // If we found generic "notary", "legal aid", etc. and it's not in incHits
+          // Many of these already live in admin or exclude lists.
+
+          if (shouldNegate) {
+            for (const p of phrasesToAdd) {
+              nonPANegs.push(p);
+            }
+          }
+        }
+      }
+
+      // Deduplicate and quote
+      const outCompetitors = dedupeQuotes(competitorNegs);
+      const outAdmin = dedupeQuotes(adminNegs);
+      const outNonPA = dedupeQuotes(nonPANegs);
+      // Master: union (maintain a stable-ish order: competitors, admin, non-PA)
+      const master = dedupeQuotes([...outCompetitors, ...outAdmin, ...outNonPA]);
+
+      return {
+        competitors: outCompetitors,
+        admin: outAdmin,
+        nonpa: outNonPA,
+        master
+      };
+    }
+
+    function updateStats(result, counts) {
+      const parts = [];
+      parts.push(`<span class="pill"><strong>Total terms:</strong> ${counts.total}</span>`);
+      parts.push(`<span class="pill"><strong>Competitors:</strong> ${result.competitors.length}</span>`);
+      parts.push(`<span class="pill"><strong>Admin:</strong> ${result.admin.length}</span>`);
+      parts.push(`<span class="pill"><strong>Non-PA:</strong> ${result.nonpa.length}</span>`);
+      parts.push(`<span class="pill"><strong>Master (deduped):</strong> ${result.master.length}</span>`);
+      el.stats.innerHTML = parts.join(" ");
+    }
+
+    function runAnalyze() {
+      const terms = parseLines(el.terms.value);
+      const cfg = {
+        firmName: el.firmName.value,
+        locations: el.locations.value,
+        includeKeywords: el.includeKeywords.value,
+        excludeKeywords: el.excludeKeywords.value,
+        flags: {
+          competitors: el.toggles.competitors.checked,
+          admin: el.toggles.admin.checked,
+          nonpa: el.toggles.nonpa.checked,
+          keepBranded: el.toggles.keepBranded.checked,
+          strict: el.toggles.strict.checked
+        }
+      };
+
+      const result = buildNegatives(terms, cfg);
+      el.outAll.value = result.master.join("\n");
+      el.outCompetitors.value = result.competitors.join("\n");
+      el.outAdmin.value = result.admin.join("\n");
+      el.outNonPA.value = result.nonpa.join("\n");
+
+      updateStats(result, { total: terms.length });
+    }
+
+    // Copy and download handlers
+    function copyTextFrom(selector) {
+      const ta = $(selector);
+      if (!ta) return;
+      const text = ta.value;
+      if (!navigator.clipboard) {
+        ta.select(); document.execCommand("copy");
+        return;
+      }
+      navigator.clipboard.writeText(text);
+    }
+    function downloadTextFrom(selector, name="export.txt") {
+      const ta = $(selector);
+      if (!ta) return;
+      const blob = new Blob([ta.value], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+    $$("[data-copy]").forEach(btn => {
+      btn.addEventListener("click", () => copyTextFrom(btn.getAttribute("data-copy")));
+    });
+    $$("[data-download]").forEach(btn => {
+      btn.addEventListener("click", () => downloadTextFrom(btn.getAttribute("data-download"), btn.getAttribute("data-name")));
+    });
+
+    // Sample
+    el.sampleBtn.addEventListener("click", () => {
+      el.firmName.value = "Smith & Jones, The Smith Law Firm, Smith Law";
+      el.locations.value = "Austin, Round Rock";
+      el.practiceTemplate.value = "personalInjury";
+      el.includeKeywords.value = PRACTICE_TEMPLATES.personalInjury.include.join(", ");
+      el.excludeKeywords.value = PRACTICE_TEMPLATES.personalInjury.exclude.join(", ");
+      el.terms.value =
+`"Search term","Clicks","Impr."
+"smith law phone number",2,34
+"law offices of garcia injury attorneys",1,14
+"avvo car accident lawyer reviews",0,33
+"findlaw slip and fall statute",0,19
+"dmv austin address",0,55
+"dog bite lawyer near me",7,112
+"immigration lawyer free consultation",0,41
+"best lawyers austin",0,28
+"rocket lawyer template demand letter",0,11
+"jail inmate search travis county",0,66
+"lawyers.com personal injury firms",0,21
+"cheap divorce attorney",0,22
+"car accident form pdf texas",0,16
+"smith & jones careers",0,9
+"car accident lawyer austin",12,203
+"workers comp attorney",0,18`;
+    });
+
+    el.clearBtn.addEventListener("click", () => {
+      el.terms.value = "";
+      el.outAll.value = "";
+      el.outCompetitors.value = "";
+      el.outAdmin.value = "";
+      el.outNonPA.value = "";
+      el.stats.innerHTML = "";
+    });
+
+    el.analyzeBtn.addEventListener("click", runAnalyze);
+
+    // Keyboard shortcut: Ctrl/Cmd+Enter to analyze
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        runAnalyze();
+      }
+    });
+  </script>
+</body>
+</html>
