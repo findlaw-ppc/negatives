@@ -248,6 +248,7 @@
           <div class="hint">Comma-separated. We’ll protect your brand terms from being negated.</div>
         </div>
       </div>
+
       <div class="row row-2 mt-12">
         <div>
           <label for="locations">Office locations</label>
@@ -255,21 +256,27 @@
           <div class="hint">Optional. Helps with city/agency noise patterns.</div>
         </div>
         <div>
-          <label for="practiceTemplate">Practice area template</label>
-          <select id="practiceTemplate">
-            <option value="">-- Select (optional) --</option>
-            <option value="personalInjury">Personal Injury</option>
-            <option value="familyLaw">Family Law</option>
-            <option value="criminalDefense">Criminal Defense</option>
-            <option value="immigration">Immigration</option>
-            <option value="employment">Employment Law</option>
-            <option value="estate">Estate Planning / Probate</option>
-            <option value="bankruptcy">Bankruptcy</option>
-            <option value="business">Business / Corporate</option>
-          </select>
-          <div class="hint">Auto-fills include + out-of-scope detection.</div>
+          <label for="practiceArea">Practice area(s)</label>
+          <input id="practiceArea" type="text" list="practiceAreaList" placeholder="e.g., Personal Injury, Criminal Defense" />
+          <datalist id="practiceAreaList">
+            <option value="Personal Injury"></option>
+            <option value="Family Law"></option>
+            <option value="Criminal Defense"></option>
+            <option value="Immigration"></option>
+            <option value="Employment Law"></option>
+            <option value="Estate Planning / Probate"></option>
+            <option value="Bankruptcy"></option>
+            <option value="Business / Corporate"></option>
+          </datalist>
+          <div class="hint">Type one or more (comma-separated). Known templates will auto-fill include/exclude. You can still edit lists manually.</div>
         </div>
       </div>
+
+      <div class="mt-8" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="toggle"><input id="autoFill" type="checkbox" checked /> Auto-fill include/exclude on change</div>
+        <div id="matchedChips" class="mt-8" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+      </div>
+
       <div class="row mt-12">
         <div>
           <label for="includeKeywords">In-scope practice keywords (include)</label>
@@ -280,7 +287,7 @@
       <div class="row mt-12">
         <div>
           <label for="excludeKeywords">Out-of-scope practice keywords (exclude)</label>
-          <textarea id="excludeKeywords" placeholder="Auto-filled from template. Add any other practices you do not serve."></textarea>
+          <textarea id="excludeKeywords" placeholder="Auto-filled from template(s). Add any other practices you do not serve."></textarea>
           <div class="hint">If a term includes any of these, we’ll recommend a negative for that phrase.</div>
         </div>
       </div>
@@ -310,6 +317,7 @@
         <summary>How it works (expand)</summary>
         <ul class="small">
           <li>Parses your Search Term Report (CSV/TSV or plain lines). We auto-pick the first text column.</li>
+          <li>Free-text practice areas: type one or more; we match common synonyms to known templates and auto-fill include/exclude (optional).</li>
           <li>Flags competitors via brand patterns and major legal directories/aggregators.</li>
           <li>Flags low-value admin intent (e.g., address, hours, jobs, login, court/DMV/jail lookups, bill pay).</li>
           <li>Flags non-practice-area if the term lacks any “include” keywords or matches “exclude” practice areas.</li>
@@ -384,7 +392,7 @@
   </main>
 
   <div class="footer-note container">
-    Tip: Tune the include/exclude lists for your vertical. Use the Strict toggle to negate full unmatched queries.
+    Tip: Type your practice area(s) and let Auto-fill build include/exclude. You can then fine-tune the lists before analyzing.
   </div>
 
   <script>
@@ -396,7 +404,7 @@
     const DIR_AGG_BRANDS = [
       "avvo","justia","findlaw","super lawyers","martindale","nolo","lawyers.com","best lawyers",
       "legalzoom","rocket lawyer","upcounsel","thumbtack","angi","angie's list","yelp","superlawyers",
-      "attorneys.com","legalmatch","hg.org","lawinfo","no win no fee" // UK style phrase
+      "attorneys.com","legalmatch","hg.org","lawinfo","no win no fee"
     ];
 
     const ADMIN_PHRASES = [
@@ -540,11 +548,37 @@
       }
     };
 
+    const PRACTICE_LABELS = {
+      personalInjury: "Personal Injury",
+      familyLaw: "Family Law",
+      criminalDefense: "Criminal Defense",
+      immigration: "Immigration",
+      employment: "Employment Law",
+      estate: "Estate Planning / Probate",
+      bankruptcy: "Bankruptcy",
+      business: "Business / Corporate"
+    };
+
+    // Synonym map for free-text resolution
+    const PRACTICE_SYNONYMS = {
+      "personal injury":"personalInjury","injury":"personalInjury","pi":"personalInjury",
+      "accident":"personalInjury","car accident":"personalInjury","auto accident":"personalInjury","mva":"personalInjury",
+      "family law":"familyLaw","family":"familyLaw","divorce":"familyLaw","custody":"familyLaw","child custody":"familyLaw","child support":"familyLaw",
+      "criminal defense":"criminalDefense","criminal":"criminalDefense","defense":"criminalDefense","dui":"criminalDefense","dwi":"criminalDefense","felony":"criminalDefense","misdemeanor":"criminalDefense",
+      "immigration":"immigration","visa":"immigration","green card":"immigration","citizenship":"immigration","naturalization":"immigration",
+      "employment law":"employment","employment":"employment","labor law":"employment","wrongful termination":"employment","discrimination":"employment","harassment":"employment",
+      "estate planning":"estate","estate":"estate","probate":"estate","will":"estate","wills":"estate","trust":"estate","elder law":"estate",
+      "bankruptcy":"bankruptcy","chapter 7":"bankruptcy","chapter 13":"bankruptcy","debt relief":"bankruptcy",
+      "business":"business","business law":"business","corporate":"business","contract":"business","startup":"business","llc":"business"
+    };
+
     // Elements
     const el = {
       firmName: $("#firmName"),
       locations: $("#locations"),
-      practiceTemplate: $("#practiceTemplate"),
+      practiceArea: $("#practiceArea"),
+      autoFill: $("#autoFill"),
+      matchedChips: $("#matchedChips"),
       includeKeywords: $("#includeKeywords"),
       excludeKeywords: $("#excludeKeywords"),
       terms: $("#terms"),
@@ -565,13 +599,111 @@
       }
     };
 
-    // Template injection
-    el.practiceTemplate.addEventListener("change", () => {
-      const key = el.practiceTemplate.value;
-      if (!key || !PRACTICE_TEMPLATES[key]) return;
-      const t = PRACTICE_TEMPLATES[key];
-      el.includeKeywords.value = t.include.join(", ");
-      el.excludeKeywords.value = t.exclude.join(", ");
+    // Helpers
+    const norm = s => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+    function csvToList(s) {
+      return (s || "")
+        .split(",")
+        .map(x => norm(x))
+        .filter(Boolean);
+    }
+
+    // Resolve free-text practice areas to template keys (supports multi, comma-separated)
+    function resolvePracticeKeys(input) {
+      const tokens = (input || "")
+        .split(",")
+        .map(norm)
+        .filter(Boolean);
+
+      const keys = new Set();
+      for (const token of tokens) {
+        // Direct synonym or label match
+        let hit = null;
+
+        // Exact synonym
+        if (PRACTICE_SYNONYMS[token]) {
+          hit = PRACTICE_SYNONYMS[token];
+        }
+
+        // Label exact match
+        if (!hit) {
+          for (const [k, label] of Object.entries(PRACTICE_LABELS)) {
+            if (norm(label) === token) { hit = k; break; }
+          }
+        }
+
+        // Substring soft match against synonyms
+        if (!hit) {
+          for (const [syn, k] of Object.entries(PRACTICE_SYNONYMS)) {
+            if (token.includes(syn) || syn.includes(token)) { hit = k; break; }
+          }
+        }
+
+        // Substring soft match against labels
+        if (!hit) {
+          for (const [k, label] of Object.entries(PRACTICE_LABELS)) {
+            const l = norm(label);
+            if (token.includes(l) || l.includes(token)) { hit = k; break; }
+          }
+        }
+
+        if (hit) keys.add(hit);
+      }
+
+      return Array.from(keys);
+    }
+
+    function unique(arr) {
+      return Array.from(new Set(arr.map(x => norm(x)))).filter(Boolean);
+    }
+
+    function applyPracticeTemplates(keys) {
+      if (!keys.length) return;
+
+      const include = [];
+      const exclude = [];
+      for (const k of keys) {
+        if (PRACTICE_TEMPLATES[k]) {
+          include.push(...PRACTICE_TEMPLATES[k].include);
+          exclude.push(...PRACTICE_TEMPLATES[k].exclude);
+        }
+      }
+      el.includeKeywords.value = unique(include).join(", ");
+      el.excludeKeywords.value = unique(exclude).join(", ");
+    }
+
+    function updateMatchedChips(keys) {
+      if (!keys.length) {
+        el.matchedChips.innerHTML = '<span class="small">No recognized templates yet. You can still edit include/exclude manually.</span>';
+        return;
+      }
+      el.matchedChips.innerHTML = keys.map(k => {
+        const label = PRACTICE_LABELS[k] || k;
+        return `<span class="chip"><span class="dot" style="background:var(--cyan)"></span>${label}</span>`;
+      }).join(" ");
+    }
+
+    function onPracticeAreaChange() {
+      const keys = resolvePracticeKeys(el.practiceArea.value);
+      updateMatchedChips(keys);
+      if (el.autoFill.checked && keys.length) {
+        applyPracticeTemplates(keys);
+      }
+    }
+
+    el.practiceArea.addEventListener("change", onPracticeAreaChange);
+    el.practiceArea.addEventListener("blur", onPracticeAreaChange);
+    el.practiceArea.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onPracticeAreaChange();
+      }
+    });
+    el.practiceArea.addEventListener("input", () => {
+      // Update chips live without overwriting lists until change/enter/blur
+      const keys = resolvePracticeKeys(el.practiceArea.value);
+      updateMatchedChips(keys);
     });
 
     // CSV-ish parsing
@@ -580,7 +712,6 @@
       const out = [];
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       if (!lines.length) return out;
-      // If first line looks like a header, remember columns
       const sep = detectSeparator(lines);
       let headers = null;
       if (sep) {
@@ -596,7 +727,6 @@
         }
         const cols = splitRow(line, sep);
         if (!cols.length) continue;
-        // choose first texty col
         let chosen = "";
         if (headers) {
           const stIdx = headers.findIndex(h => /search\s*term/.test(h));
@@ -623,7 +753,6 @@
 
     function splitRow(line, sep) {
       if (!sep) return [line];
-      // Very light CSV/TSV split (no nested quotes beyond first field is fine)
       const parts = [];
       let cur = "";
       let inQ = false;
@@ -644,39 +773,10 @@
       return parts;
     }
 
-    // Normalization
-    const norm = s => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
-
-    function csvToList(s) {
-      return (s || "")
-        .split(",")
-        .map(x => norm(x))
-        .filter(Boolean);
-    }
-
-    function words(s) {
-      return norm(s).split(/\s+/).filter(Boolean);
-    }
-
-    // Matching helpers
     function containsPhrase(term, phrase) {
       term = " " + norm(term) + " ";
       phrase = " " + norm(phrase) + " ";
       return term.includes(phrase);
-    }
-
-    function anyMatch(term, arr) {
-      term = " " + norm(term) + " ";
-      return arr.find(p => term.includes(" " + norm(p) + " "));
-    }
-
-    function anyRegex(term, regexes) {
-      const t = norm(term);
-      for (const r of regexes) {
-        const m = t.match(r);
-        if (m) return m;
-      }
-      return null;
     }
 
     function dedupeQuotes(list) {
@@ -685,7 +785,7 @@
       for (let item of list) {
         const q = toPhrase(item);
         const key = q.toLowerCase();
-        if (!seen.has(key)) {
+        if (!seen.has(key) && q) {
           seen.add(key);
           out.push(q);
         }
@@ -695,9 +795,7 @@
 
     function toPhrase(kw) {
       kw = norm(kw).replace(/["]+/g, "");
-      // Ensure it's not empty
       if (!kw) return "";
-      // Quote always for explicit phrase-match clarity
       return `"${kw}"`;
     }
 
@@ -706,39 +804,27 @@
       const t = norm(term);
       const hits = new Set();
 
-      // 1) Legal directories / aggregators exact phrases
+      // Directories/aggregators
       for (const b of DIR_AGG_BRANDS) {
         if (containsPhrase(t, b)) hits.add(b);
       }
 
-      // 2) Common law brand patterns
-      // e.g., "law offices of smith", "smith law", "smith & jones", "smith associates", "jones legal group", "smith llp"
+      // Firm-name patterns
       const patterns = [
         /\blaw offices of ([a-z][a-z\s&'-]{2,})\b/i,
         /\b([a-z][a-z&'\-]{2,}\s+(?:law|legal|attorneys?|lawyers?|trial|injury|group|associates))\b/i,
         /\b([a-z][a-z&'\-]{2,}\s*&\s*[a-z][a-z&'\-]{2,})\b/i,
-        /\b([a-z][a-z&'\-]{2,}\s+(?:llp|pllc|pc|p\.a\.|pa))\b/i
-      ];
-      const rxHits = [];
-      for (const rx of patterns) {
-        const m = t.match(rx);
-        if (m && m[1]) rxHits.push(m[1]);
-      }
-      rxHits.forEach(h => hits.add(norm(h)));
-
-      // 3) If a brand-like token is present with "law firm" / "law office"
-      const pattern2 = [
+        /\b([a-z][a-z&'\-]{2,}\s+(?:llp|pllc|pc|p\.a\.|pa))\b/i,
         /\b([a-z][a-z&'\-]{2,}\s+(?:law firm|law office|law offices))\b/i
       ];
-      for (const rx of pattern2) {
+      for (const rx of patterns) {
         const m = t.match(rx);
         if (m && m[1]) hits.add(norm(m[1]));
       }
 
-      // Remove anything that matches my own brand variants
+      // Exclude own brand
       const mySet = new Set(myBrands.map(norm));
-      const filtered = Array.from(hits).filter(h => !mySet.has(h));
-      return filtered;
+      return Array.from(hits).filter(h => !mySet.has(h));
     }
 
     function isMyBrand(term, myBrands) {
@@ -750,7 +836,6 @@
       return false;
     }
 
-    // Extract admin intent phrases present in term
     function extractAdminPhrases(term) {
       const t = " " + norm(term) + " ";
       const hits = [];
@@ -758,17 +843,11 @@
         const needle = " " + norm(p) + " ";
         if (t.includes(needle)) hits.push(p);
       }
-      // Some combos (e.g., "phone", "number" separately)
-      if (/\b(phone|call|telephone)\b/.test(t) && /\b(number|no\.?)\b/.test(t)) {
-        hits.push("phone number");
-      }
-      if (/\b(bill|pay|payment)\b/.test(t) && /\b(online|portal)?\b/.test(t)) {
-        hits.push("online payment");
-      }
+      if (/\b(phone|call|telephone)\b/.test(t) && /\b(number|no\.?)\b/.test(t)) hits.push("phone number");
+      if (/\b(bill|pay|payment)\b/.test(t) && /\b(online|portal)?\b/.test(t)) hits.push("online payment");
       return Array.from(new Set(hits));
     }
 
-    // Practice area matching
     function findIncludes(term, includeList) {
       const t = " " + norm(term) + " ";
       const hits = [];
@@ -797,9 +876,8 @@
 
       const myBrands = csvToList(cfg.firmName);
       const includeList = csvToList(cfg.includeKeywords);
-      let excludeList = csvToList(cfg.excludeKeywords);
+      const excludeList = csvToList(cfg.excludeKeywords);
 
-      // Add directory brands to competitor negs when encountered
       for (const raw of inputTerms) {
         const term = norm(raw);
         if (!term) continue;
@@ -809,7 +887,6 @@
         // Competitors
         if (cfg.flags.competitors) {
           const compTokens = extractCompetitorBrandTokens(term, myBrands);
-          // If term contains directory brand or brand-like other firm, add that token (not full query)
           for (const token of compTokens) {
             if (cfg.flags.keepBranded && branded) continue;
             competitorNegs.push(token);
@@ -820,7 +897,6 @@
         if (cfg.flags.admin) {
           const aHits = extractAdminPhrases(term);
           for (const a of aHits) {
-            // Avoid negating if it also includes my brand and toggle is on
             if (cfg.flags.keepBranded && branded) continue;
             adminNegs.push(a);
           }
@@ -838,7 +914,6 @@
             phrasesToAdd.push(...excHits);
           }
 
-          // If no include hit and strict mode, negate full term (unless branded)
           if (!incHits.length && !excHits.length && cfg.flags.strict) {
             if (!(cfg.flags.keepBranded && branded)) {
               shouldNegate = true;
@@ -846,30 +921,18 @@
             }
           }
 
-          // If we found generic "notary", "legal aid", etc. and it's not in incHits
-          // Many of these already live in admin or exclude lists.
-
           if (shouldNegate) {
-            for (const p of phrasesToAdd) {
-              nonPANegs.push(p);
-            }
+            for (const p of phrasesToAdd) nonPANegs.push(p);
           }
         }
       }
 
-      // Deduplicate and quote
       const outCompetitors = dedupeQuotes(competitorNegs);
       const outAdmin = dedupeQuotes(adminNegs);
       const outNonPA = dedupeQuotes(nonPANegs);
-      // Master: union (maintain a stable-ish order: competitors, admin, non-PA)
       const master = dedupeQuotes([...outCompetitors, ...outAdmin, ...outNonPA]);
 
-      return {
-        competitors: outCompetitors,
-        admin: outAdmin,
-        nonpa: outNonPA,
-        master
-      };
+      return { competitors: outCompetitors, admin: outAdmin, nonpa: outNonPA, master };
     }
 
     function updateStats(result, counts) {
@@ -941,9 +1004,8 @@
     el.sampleBtn.addEventListener("click", () => {
       el.firmName.value = "Smith & Jones, The Smith Law Firm, Smith Law";
       el.locations.value = "Austin, Round Rock";
-      el.practiceTemplate.value = "personalInjury";
-      el.includeKeywords.value = PRACTICE_TEMPLATES.personalInjury.include.join(", ");
-      el.excludeKeywords.value = PRACTICE_TEMPLATES.personalInjury.exclude.join(", ");
+      el.practiceArea.value = "Personal Injury";
+      onPracticeAreaChange();
       el.terms.value =
 `"Search term","Clicks","Impr."
 "smith law phone number",2,34
@@ -981,6 +1043,9 @@
         runAnalyze();
       }
     });
+
+    // Initialize chips on load
+    updateMatchedChips(resolvePracticeKeys(el.practiceArea.value));
   </script>
 </body>
 </html>
