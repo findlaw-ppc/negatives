@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Law Firm Negative Keyword Generator</title>
@@ -122,9 +121,7 @@
     <div class="subtitle">
       Paste your Search Term Report, analyze intent, and export a clean list of phrase-match negatives: competitors, low-value admin queries, and non-practice-area terms.
     </div>
-  </header>
-
-  <main class="container grid">
+  </header>  <main class="container grid">
     <!-- LEFT: SETTINGS -->
     <section class="card">
       <h3>Campaign Context</h3>
@@ -134,168 +131,161 @@
           <input id="firmName" type="text" placeholder="e.g., Smith & Jones, The Smith Law Firm, Smith Law" />
           <div class="hint">Comma-separated. We’ll protect your brand terms from being negated.</div>
         </div>
-      </div>
-
-      <div class="row row-2 mt-12">
-        <div>
-          <label for="locations">Office locations</label>
-          <input id="locations" type="text" placeholder="e.g., Austin, Dallas, San Antonio" />
-          <div class="hint">Optional. Helps with city/agency noise patterns.</div>
-        </div>
-        <div>
-          <label for="practiceArea">Practice area(s)</label>
-          <input id="practiceArea" type="text" list="practiceAreaList" placeholder="e.g., Personal Injury, Criminal Defense" />
-          <datalist id="practiceAreaList">
-            <option value="Personal Injury"></option>
-            <option value="Family Law"></option>
-            <option value="Criminal Defense"></option>
-            <option value="Immigration"></option>
-            <option value="Employment Law"></option>
-            <option value="Estate Planning / Probate"></option>
-            <option value="Bankruptcy"></option>
-            <option value="Business / Corporate"></option>
-          </datalist>
-          <div class="hint">Type one or more (comma-separated). Known templates auto-fill include/exclude. You can still edit lists manually.</div>
-        </div>
-      </div>
-
-      <div class="mt-8" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div class="toggle"><input id="autoFill" type="checkbox" checked /> Auto-fill include/exclude on change</div>
-        <div id="matchedChips" class="mt-8" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-      </div>
-
-      <div class="row mt-12">
-        <div>
-          <label for="includeKeywords">In-scope practice keywords (include)</label>
-          <textarea id="includeKeywords" placeholder="Comma-separated. e.g., personal injury, accident lawyer, car accident, slip and fall, wrongful death"></textarea>
-          <div class="hint">Any term containing one of these is treated as in-scope (not a Non-PA negative).</div>
-        </div>
-      </div>
-      <div class="row mt-12">
-        <div>
-          <label for="excludeKeywords">Out-of-scope practice keywords (exclude)</label>
-          <textarea id="excludeKeywords" placeholder="Auto-filled from template(s). Add any other practices you do not serve."></textarea>
-          <div class="hint">If a term includes any of these, we’ll recommend a Non-PA negative for that phrase.</div>
-        </div>
-      </div>
-
-      <div class="row mt-12">
-        <div>
-          <label for="whitelist">Never negate (whitelist)</label>
-          <textarea id="whitelist" placeholder="One or more phrases, comma-separated. These will never appear in negatives."></textarea>
-          <div class="hint">Extra safety for brand or sensitive phrases. Applied after all logic.</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Heuristics & Filters</h3>
-        <div class="row row-2">
-          <div>
-            <label>Competitor/Directory brands (preloaded)</label>
-            <div class="small">Avvo, Justia, FindLaw, Super Lawyers, Martindale, Nolo, Lawyers.com, LegalZoom, Rocket Lawyer, Yelp, Thumbtack, Angi, UpCounsel, Best Lawyers</div>
-          </div>
-          <div>
-            <label>Administrative noise (preloaded)</label>
-            <div class="small">address, phone number, fax, directions, map, hours, login, portal, billing, payment, forms, PDF, application, jobs, careers, DMV, jail, inmate search, court, clerk, jury duty, legal aid, pro bono, free</div>
-          </div>
-        </div>
-        <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
-          <label class="toggle"><input id="toggleCompetitors" type="checkbox" checked /> Competitors</label>
-          <label class="toggle"><input id="toggleAdmin" type="checkbox" checked /> Low-value admin</label>
-          <label class="toggle"><input id="toggleNonPA" type="checkbox" checked /> Non-practice-area</label>
-          <label class="toggle"><input id="toggleKeepBranded" type="checkbox" checked /> Never negate my brand</label>
-          <label class="toggle"><input id="toggleStrict" type="checkbox" /> Strict non-PA (negate full unmatched queries)</label>
-        </div>
-        <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
-          <label class="toggle"><input id="toggleHardProtect" type="checkbox" checked /> Absolute protect in-scope phrases</label>
-          <label class="toggle"><input id="toggleSuppressOnInclude" type="checkbox" /> Suppress competitor/admin if term matches in-scope</label>
-        </div>
-      </div>
-
-      <details class="mt-12">
-        <summary>How it works (expand)</summary>
-        <ul class="small">
-          <li>Parses your Search Term Report (CSV/TSV or plain lines). We auto-pick the first text column.</li>
-          <li>Free-text practice areas: type one or more; we match synonyms to known templates and auto-fill include/exclude (optional).</li>
-          <li>Competitor extraction excludes generic practice phrases and your include keywords to avoid false positives like “personal injury.”</li>
-          <li>Low-value admin detection covers address/hours/login/billing/jobs/court/DMV/jail/etc.</li>
-          <li>Non-PA: Exclude hits add negatives; Strict negates unmatched full queries (unless brand-protected).</li>
-          <li>Safety: Whitelist + “Absolute protect” remove any negative that equals/contains in-scope phrases or your whitelist terms.</li>
-        </ul>
-      </details>
-    </section>
-
-    <!-- RIGHT: INPUT + OUTPUT -->
-    <section class="card">
-      <h3>Search Term Report</h3>
-      <label for="terms">Paste terms (one per line, CSV/TSV OK)</label>
-      <textarea id="terms" placeholder="Paste your Search Term Report here..."></textarea>
-      <div class="btn-row mt-8">
-        <button class="btn" id="analyzeBtn">Analyze & Generate Negatives</button>
-        <button class="btn secondary" id="sampleBtn">Load Sample</button>
-        <button class="btn secondary" id="clearBtn">Clear</button>
-      </div>
-
-      <div class="legend">
-        <span class="chip green"><span class="dot"></span> Competitors</span>
-        <span class="chip yellow"><span class="dot"></span> Admin</span>
-        <span class="chip red"><span class="dot"></span> Non-PA</span>
-        <span class="chip cyan"><span class="dot"></span> All (deduped)</span>
-      </div>
-
-      <div class="section">
-        <div class="statline" id="stats"></div>
-        <div class="row row-2 mt-8">
-          <div>
-            <label>Master negative list (phrase-match)</label>
-            <textarea id="outAll" class="out" readonly></textarea>
-            <div class="btn-row mt-8">
-              <button class="btn" data-copy="#outAll">Copy all</button>
-              <button class="btn secondary" data-download="#outAll" data-name="negatives-all.txt">Download</button>
-              <button class="btn secondary" data-download-csv="#outAll" data-name="negatives-all.csv">Download CSV</button>
-              <span class="chip cyan"><span class="dot"></span> Deduped</span>
-            </div>
-          </div>
-          <div>
-            <label>Competitors</label>
-            <textarea id="outCompetitors" class="out" readonly></textarea>
-            <div class="btn-row mt-8">
-              <button class="btn" data-copy="#outCompetitors">Copy</button>
-              <button class="btn secondary" data-download="#outCompetitors" data-name="negatives-competitors.txt">Download</button>
-              <span class="chip green"><span class="dot"></span> Brand/Directory</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="row row-2 mt-8">
-          <div>
-            <label>Low-value administrative</label>
-            <textarea id="outAdmin" class="out" readonly></textarea>
-            <div class="btn-row mt-8">
-              <button class="btn" data-copy="#outAdmin">Copy</button>
-              <button class="btn secondary" data-download="#outAdmin" data-name="negatives-admin.txt">Download</button>
-              <span class="chip yellow"><span class="dot"></span> Admin intent</span>
-            </div>
-          </div>
-          <div>
-            <label>Non-practice-area</label>
-            <textarea id="outNonPA" class="out" readonly></textarea>
-            <div class="btn-row mt-8">
-              <button class="btn" data-copy="#outNonPA">Copy</button>
-              <button class="btn secondary" data-download="#outNonPA" data-name="negatives-nonpa.txt">Download</button>
-              <span class="chip red"><span class="dot"></span> Out of scope</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="footer-note container">
-    Tip: Keep Auto-fill on to populate in-scope/exclude phrases; the Absolute protect + Whitelist keep your practice terms from ever being negated.
+      </div>  <div class="row row-2 mt-12">
+    <div>
+      <label for="locations">Office locations</label>
+      <input id="locations" type="text" placeholder="e.g., Austin, Dallas, San Antonio" />
+      <div class="hint">Optional. Helps with city/agency noise patterns.</div>
+    </div>
+    <div>
+      <label for="practiceArea">Practice area(s)</label>
+      <input id="practiceArea" type="text" list="practiceAreaList" placeholder="e.g., Personal Injury, Criminal Defense" />
+      <datalist id="practiceAreaList">
+        <option value="Personal Injury"></option>
+        <option value="Family Law"></option>
+        <option value="Criminal Defense"></option>
+        <option value="Immigration"></option>
+        <option value="Employment Law"></option>
+        <option value="Estate Planning / Probate"></option>
+        <option value="Bankruptcy"></option>
+        <option value="Business / Corporate"></option>
+      </datalist>
+      <div class="hint">Type one or more (comma-separated). Known templates auto-fill include/exclude. You can still edit lists manually.</div>
+    </div>
   </div>
 
-  <script>
+  <div class="mt-8" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div class="toggle"><input id="autoFill" type="checkbox" checked /> Auto-fill include/exclude on change</div>
+    <div id="matchedChips" class="mt-8" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="row mt-12">
+    <div>
+      <label for="includeKeywords">In-scope practice keywords (include)</label>
+      <textarea id="includeKeywords" placeholder="Comma-separated. e.g., personal injury, accident lawyer, car accident, slip and fall, wrongful death"></textarea>
+      <div class="hint">Any term containing one of these is in-scope and can never be suggested as a negative.</div>
+    </div>
+  </div>
+  <div class="row mt-12">
+    <div>
+      <label for="excludeKeywords">Out-of-scope practice keywords (exclude)</label>
+      <textarea id="excludeKeywords" placeholder="Auto-filled from template(s). Add any other practices you do not serve."></textarea>
+      <div class="hint">If a term includes any of these, we’ll recommend a Non-PA negative for that phrase.</div>
+    </div>
+  </div>
+
+  <div class="row mt-12">
+    <div>
+      <label for="whitelist">Never negate (whitelist)</label>
+      <textarea id="whitelist" placeholder="One or more phrases, comma-separated. These will never appear in negatives."></textarea>
+      <div class="hint">Extra safety for brand or sensitive phrases. Applied after all logic.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Heuristics & Filters</h3>
+    <div class="row row-2">
+      <div>
+        <label>Competitor/Directory brands (preloaded)</label>
+        <div class="small">Avvo, Justia, FindLaw, Super Lawyers, Martindale, Nolo, Lawyers.com, LegalZoom, Rocket Lawyer, Yelp, Thumbtack, Angi, UpCounsel, Best Lawyers</div>
+      </div>
+      <div>
+        <label>Administrative noise (preloaded)</label>
+        <div class="small">address, phone number, fax, directions, map, hours, login, portal, billing, payment, forms, PDF, application, jobs, careers, DMV, jail, inmate search, court, clerk, jury duty, legal aid, pro bono, free</div>
+      </div>
+    </div>
+    <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
+      <label class="toggle"><input id="toggleCompetitors" type="checkbox" checked /> Competitors</label>
+      <label class="toggle"><input id="toggleAdmin" type="checkbox" checked /> Low-value admin</label>
+      <label class="toggle"><input id="toggleNonPA" type="checkbox" checked /> Non-practice-area</label>
+      <label class="toggle"><input id="toggleKeepBranded" type="checkbox" checked /> Never negate my brand</label>
+      <label class="toggle"><input id="toggleStrict" type="checkbox" /> Strict non-PA (negate full unmatched queries)</label>
+    </div>
+    <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
+      <label class="toggle"><input id="toggleSuppressOnInclude" type="checkbox" /> Suppress competitor/admin if term matches in-scope</label>
+      <span class="small">Absolute protection of in-scope phrases is always ON.</span>
+    </div>
+  </div>
+
+  <details class="mt-12">
+    <summary>How it works (expand)</summary>
+    <ul class="small">
+      <li>Parses your Search Term Report (CSV/TSV or plain lines). We auto-pick the first text column.</li>
+      <li>Free-text practice areas: type one or more; we match synonyms to known templates and auto-fill include/exclude (optional).</li>
+      <li>Competitor extraction excludes generic practice phrases and your in-scope keywords, so practice terms never become competitor negatives.</li>
+      <li>Safety: Any negative candidate that equals/contains an in-scope phrase or a whitelist term is removed from all outputs.</li>
+      <li>Non-PA: Exclude hits add negatives; Strict negates unmatched full queries (unless brand-protected).</li>
+    </ul>
+  </details>
+</section>
+
+<!-- RIGHT: INPUT + OUTPUT -->
+<section class="card">
+  <h3>Search Term Report</h3>
+  <label for="terms">Paste terms (one per line, CSV/TSV OK)</label>
+  <textarea id="terms" placeholder="Paste your Search Term Report here..."></textarea>
+  <div class="btn-row mt-8">
+    <button class="btn" id="analyzeBtn">Analyze & Generate Negatives</button>
+    <button class="btn secondary" id="sampleBtn">Load Sample</button>
+    <button class="btn secondary" id="clearBtn">Clear</button>
+  </div>
+
+  <div class="legend">
+    <span class="chip green"><span class="dot"></span> Competitors</span>
+    <span class="chip yellow"><span class="dot"></span> Admin</span>
+    <span class="chip red"><span class="dot"></span> Non-PA</span>
+    <span class="chip cyan"><span class="dot"></span> All (deduped)</span>
+  </div>
+
+  <div class="section">
+    <div class="statline" id="stats"></div>
+    <div class="row row-2 mt-8">
+      <div>
+        <label>Master negative list (phrase-match)</label>
+        <textarea id="outAll" class="out" readonly></textarea>
+        <div class="btn-row mt-8">
+          <button class="btn" data-copy="#outAll">Copy all</button>
+          <button class="btn secondary" data-download="#outAll" data-name="negatives-all.txt">Download</button>
+          <button class="btn secondary" data-download-csv="#outAll" data-name="negatives-all.csv">Download CSV</button>
+          <span class="chip cyan"><span class="dot"></span> Deduped</span>
+        </div>
+      </div>
+      <div>
+        <label>Competitors</label>
+        <textarea id="outCompetitors" class="out" readonly></textarea>
+        <div class="btn-row mt-8">
+          <button class="btn" data-copy="#outCompetitors">Copy</button>
+          <button class="btn secondary" data-download="#outCompetitors" data-name="negatives-competitors.txt">Download</button>
+          <span class="chip green"><span class="dot"></span> Brand/Directory</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row row-2 mt-8">
+      <div>
+        <label>Low-value administrative</label>
+        <textarea id="outAdmin" class="out" readonly></textarea>
+        <div class="btn-row mt-8">
+          <button class="btn" data-copy="#outAdmin">Copy</button>
+          <button class="btn secondary" data-download="#outAdmin" data-name="negatives-admin.txt">Download</button>
+          <span class="chip yellow"><span class="dot"></span> Admin intent</span>
+        </div>
+      </div>
+      <div>
+        <label>Non-practice-area</label>
+        <textarea id="outNonPA" class="out" readonly></textarea>
+        <div class="btn-row mt-8">
+          <button class="btn" data-copy="#outNonPA">Copy</button>
+          <button class="btn secondary" data-download="#outNonPA" data-name="negatives-nonpa.txt">Download</button>
+          <span class="chip red"><span class="dot"></span> Out of scope</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+  </main>  <div class="footer-note container">
+    Tip: Keep Auto-fill on to populate in-scope/exclude phrases; absolute protection + whitelist ensure your practice terms are never negated.
+  </div>  <script>
     // Utility helpers
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -326,150 +316,20 @@
       "county","city","state","national","federal","public"
     ];
 
-    // Practice area templates
+    // Practice templates, labels, synonyms
     const PRACTICE_TEMPLATES = {
-      personalInjury: {
-        include: [
-          "personal injury","injury lawyer","injury attorney","accident lawyer","accident attorney",
-          "car accident","auto accident","motor vehicle accident","mva","truck accident","semi truck accident",
-          "18 wheeler accident","motorcycle accident","uber accident","lyft accident","rideshare accident",
-          "bicycle accident","pedestrian accident","slip and fall","trip and fall","premises liability",
-          "wrongful death","dog bite","insurance claim","catastrophic injury","brain injury","spinal cord",
-          "burn injury","construction accident"
-        ],
-        exclude: [
-          "immigration","visa","citizenship","green card",
-          "divorce","family law","child custody","child support","alimony","paternity","adoption","prenup",
-          "criminal","dui","dwi","assault","battery","domestic violence","theft","burglary","expungement",
-          "bankruptcy","chapter 7","chapter 13","debt relief","foreclosure",
-          "employment","wrongful termination","discrimination","harassment","overtime","wage theft","severance",
-          "estate planning","probate","will","trust","power of attorney","elder law",
-          "real estate","landlord tenant","ip","patent","trademark","copyright","tax","business","corporate",
-          "lemon law","ssd","ssi","workers comp","worker's comp","workers' comp","medical malpractice"
-        ]
-      },
-      familyLaw: {
-        include: [
-          "family law","divorce","child custody","child support","alimony","spousal support","paternity",
-          "adoption","prenup","prenuptial agreement","postnuptial","guardianship","modification","parenting plan"
-        ],
-        exclude: [
-          "immigration","visa","citizenship","green card",
-          "criminal","dui","dwi","assault","domestic violence defense","theft","burglary","expungement",
-          "bankruptcy","chapter 7","chapter 13","debt relief",
-          "employment","wrongful termination","discrimination","harassment",
-          "estate planning","probate","will","trust","elder law",
-          "personal injury","car accident","slip and fall","wrongful death",
-          "business","corporate","real estate","landlord tenant","tax","ip","patent","trademark","copyright"
-        ]
-      },
-      criminalDefense: {
-        include: [
-          "criminal defense","criminal lawyer","defense attorney","dui","dwi","drug possession",
-          "assault","battery","domestic violence","theft","burglary","expungement","record sealing",
-          "felony","misdemeanor","gun charge","probation violation","sex offense","white collar"
-        ],
-        exclude: [
-          "immigration","visa","green card","citizenship",
-          "divorce","child custody","family law","alimony",
-          "bankruptcy","chapter 7","chapter 13","debt relief",
-          "estate planning","probate","will","trust",
-          "personal injury","car accident","slip and fall","wrongful death",
-          "employment","business","corporate","real estate","landlord tenant","tax","ip","patent","trademark","copyright"
-        ]
-      },
-      immigration: {
-        include: [
-          "immigration","immigration lawyer","green card","visa","citizenship","naturalization",
-          "asylum","deportation","removal defense","h1b","k1","i-130","i-485","uscis","work permit","ead"
-        ],
-        exclude: [
-          "divorce","family law","child custody",
-          "criminal","dui","dwi","assault","expungement",
-          "bankruptcy","chapter 7","chapter 13",
-          "estate planning","probate","will","trust",
-          "personal injury","car accident","slip and fall",
-          "employment","wrongful termination",
-          "real estate","landlord tenant","tax","ip","business","corporate"
-        ]
-      },
-      employment: {
-        include: [
-          "employment lawyer","employment attorney","wrongful termination","discrimination","harassment",
-          "overtime","wage theft","unpaid wages","non-compete","severance","retaliation","fmla"
-        ],
-        exclude: [
-          "immigration","green card","visa",
-          "divorce","family law","child custody",
-          "criminal","dui","expungement",
-          "bankruptcy","chapter 7","chapter 13",
-          "estate planning","probate","trust","will",
-          "personal injury","car accident","slip and fall",
-          "business","corporate","real estate","landlord tenant","tax","ip"
-        ]
-      },
-      estate: {
-        include: [
-          "estate planning","probate","will","trust","power of attorney","living will","advance directive",
-          "elder law","special needs trust","executor","trust administration"
-        ],
-        exclude: [
-          "immigration","visa","green card",
-          "divorce","family law","child custody",
-          "criminal","dui","expungement",
-          "bankruptcy","chapter 7","chapter 13",
-          "personal injury","car accident","slip and fall",
-          "employment","wrongful termination",
-          "business","corporate","real estate","landlord tenant","tax","ip"
-        ]
-      },
-      bankruptcy: {
-        include: [
-          "bankruptcy","chapter 7","chapter 13","debt relief","debt attorney","foreclosure defense",
-          "wage garnishment","creditor harassment"
-        ],
-        exclude: [
-          "immigration","visa",
-          "divorce","family law","child custody",
-          "criminal","dui","expungement",
-          "estate planning","probate","trust","will",
-          "personal injury","car accident","slip and fall",
-          "employment","wrongful termination",
-          "business","corporate","real estate","landlord tenant","tax","ip"
-        ]
-      },
-      business: {
-        include: [
-          "business lawyer","corporate lawyer","contract lawyer","llc formation","incorporation",
-          "mergers","acquisitions","startup lawyer","general counsel","commercial litigation"
-        ],
-        exclude: [
-          "immigration","visa",
-          "divorce","family law","child custody",
-          "criminal","dui","expungement",
-          "estate planning","probate","trust","will",
-          "personal injury","car accident","slip and fall",
-          "employment","wrongful termination",
-          "real estate","landlord tenant","tax","ip"
-        ]
-      }
+      personalInjury: { include: ["personal injury","injury lawyer","injury attorney","accident lawyer","accident attorney","car accident","auto accident","motor vehicle accident","mva","truck accident","semi truck accident","18 wheeler accident","motorcycle accident","uber accident","lyft accident","rideshare accident","bicycle accident","pedestrian accident","slip and fall","trip and fall","premises liability","wrongful death","dog bite","insurance claim","catastrophic injury","brain injury","spinal cord","burn injury","construction accident"], exclude: ["immigration","visa","citizenship","green card","divorce","family law","child custody","child support","alimony","paternity","adoption","prenup","criminal","dui","dwi","assault","battery","domestic violence","theft","burglary","expungement","bankruptcy","chapter 7","chapter 13","debt relief","foreclosure","employment","wrongful termination","discrimination","harassment","overtime","wage theft","severance","estate planning","probate","will","trust","power of attorney","elder law","real estate","landlord tenant","ip","patent","trademark","copyright","tax","business","corporate","lemon law","ssd","ssi","workers comp","worker's comp","workers' comp","medical malpractice"] },
+      familyLaw: { include: ["family law","divorce","child custody","child support","alimony","spousal support","paternity","adoption","prenup","prenuptial agreement","postnuptial","guardianship","modification","parenting plan"], exclude: ["immigration","visa","citizenship","green card","criminal","dui","dwi","assault","domestic violence defense","theft","burglary","expungement","bankruptcy","chapter 7","chapter 13","debt relief","employment","wrongful termination","discrimination","harassment","estate planning","probate","will","trust","elder law","personal injury","car accident","slip and fall","wrongful death","business","corporate","real estate","landlord tenant","tax","ip","patent","trademark","copyright"] },
+      criminalDefense: { include: ["criminal defense","criminal lawyer","defense attorney","dui","dwi","drug possession","assault","battery","domestic violence","theft","burglary","expungement","record sealing","felony","misdemeanor","gun charge","probation violation","sex offense","white collar"], exclude: ["immigration","visa","green card","citizenship","divorce","child custody","family law","alimony","bankruptcy","chapter 7","chapter 13","debt relief","estate planning","probate","will","trust","personal injury","car accident","slip and fall","wrongful death","employment","business","corporate","real estate","landlord tenant","tax","ip","patent","trademark","copyright"] },
+      immigration: { include: ["immigration","immigration lawyer","green card","visa","citizenship","naturalization","asylum","deportation","removal defense","h1b","k1","i-130","i-485","uscis","work permit","ead"], exclude: ["divorce","family law","child custody","criminal","dui","dwi","assault","expungement","bankruptcy","chapter 7","chapter 13","estate planning","probate","will","trust","personal injury","car accident","slip and fall","employment","wrongful termination","real estate","landlord tenant","tax","ip","business","corporate"] },
+      employment: { include: ["employment lawyer","employment attorney","wrongful termination","discrimination","harassment","overtime","wage theft","unpaid wages","non-compete","severance","retaliation","fmla"], exclude: ["immigration","green card","visa","divorce","family law","child custody","criminal","dui","expungement","bankruptcy","chapter 7","chapter 13","estate planning","probate","trust","will","personal injury","car accident","slip and fall","business","corporate","real estate","landlord tenant","tax","ip"] },
+      estate: { include: ["estate planning","probate","will","trust","power of attorney","living will","advance directive","elder law","special needs trust","executor","trust administration"], exclude: ["immigration","visa","green card","divorce","family law","child custody","criminal","dui","expungement","bankruptcy","chapter 7","chapter 13","personal injury","car accident","slip and fall","employment","wrongful termination","business","corporate","real estate","landlord tenant","tax","ip"] },
+      bankruptcy: { include: ["bankruptcy","chapter 7","chapter 13","debt relief","debt attorney","foreclosure defense","wage garnishment","creditor harassment"], exclude: ["immigration","visa","divorce","family law","child custody","criminal","dui","expungement","estate planning","probate","trust","will","personal injury","car accident","slip and fall","employment","wrongful termination","business","corporate","real estate","landlord tenant","tax","ip"] },
+      business: { include: ["business lawyer","corporate lawyer","contract lawyer","llc formation","incorporation","mergers","acquisitions","startup lawyer","general counsel","commercial litigation"], exclude: ["immigration","visa","divorce","family law","child custody","criminal","dui","expungement","estate planning","probate","trust","will","personal injury","car accident","slip and fall","employment","wrongful termination","real estate","landlord tenant","tax","ip"] }
     };
-
-    const PRACTICE_LABELS = {
-      personalInjury: "Personal Injury",
-      familyLaw: "Family Law",
-      criminalDefense: "Criminal Defense",
-      immigration: "Immigration",
-      employment: "Employment Law",
-      estate: "Estate Planning / Probate",
-      bankruptcy: "Bankruptcy",
-      business: "Business / Corporate"
-    };
-
-    // Synonym map for free-text resolution
+    const PRACTICE_LABELS = { personalInjury:"Personal Injury", familyLaw:"Family Law", criminalDefense:"Criminal Defense", immigration:"Immigration", employment:"Employment Law", estate:"Estate Planning / Probate", bankruptcy:"Bankruptcy", business:"Business / Corporate" };
     const PRACTICE_SYNONYMS = {
-      "personal injury":"personalInjury","injury":"personalInjury","pi":"personalInjury",
-      "accident":"personalInjury","car accident":"personalInjury","auto accident":"personalInjury","mva":"personalInjury",
+      "personal injury":"personalInjury","injury":"personalInjury","pi":"personalInjury","accident":"personalInjury","car accident":"personalInjury","auto accident":"personalInjury","mva":"personalInjury",
       "family law":"familyLaw","family":"familyLaw","divorce":"familyLaw","custody":"familyLaw","child custody":"familyLaw","child support":"familyLaw",
       "criminal defense":"criminalDefense","criminal":"criminalDefense","defense":"criminalDefense","dui":"criminalDefense","dwi":"criminalDefense","felony":"criminalDefense","misdemeanor":"criminalDefense",
       "immigration":"immigration","visa":"immigration","green card":"immigration","citizenship":"immigration","naturalization":"immigration",
@@ -504,7 +364,6 @@
         nonpa: $("#toggleNonPA"),
         keepBranded: $("#toggleKeepBranded"),
         strict: $("#toggleStrict"),
-        hardProtect: $("#toggleHardProtect"),
         suppressOnInclude: $("#toggleSuppressOnInclude")
       }
     };
@@ -513,11 +372,9 @@
     const norm = s => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
     const pad = s => " " + norm(s) + " ";
 
-    function csvToList(s) {
-      return (s || "").split(",").map(x => norm(x)).filter(Boolean);
-    }
+    function csvToList(s) { return (s || "").split(",").map(x => norm(x)).filter(Boolean); }
 
-    // Resolve free-text practice areas to template keys (supports multi, comma-separated)
+    // Resolve practice areas
     function resolvePracticeKeys(input) {
       const tokens = (input || "").split(",").map(norm).filter(Boolean);
       const keys = new Set();
@@ -531,9 +388,7 @@
       return Array.from(keys);
     }
 
-    function unique(arr) {
-      return Array.from(new Set(arr.map(x => norm(x)))).filter(Boolean);
-    }
+    function unique(arr) { return Array.from(new Set(arr.map(x => norm(x)))).filter(Boolean); }
 
     function applyPracticeTemplates(keys) {
       if (!keys.length) return;
@@ -608,9 +463,7 @@
     }
 
     function containsPhrase(term, phrase) { return pad(term).includes(pad(phrase)); }
-
     function dedupe(list) { return Array.from(new Set(list.map(x => norm(x)))).filter(Boolean); }
-
     function toPhrase(kw) { kw = norm(kw).replace(/["]+/g, ""); return kw ? `"${kw}"` : ""; }
 
     // Safety predicates
@@ -620,8 +473,7 @@
       if (GENERIC_PRACTICE_PREFIXES.includes(first)) return true;
       const tpad = " " + t + " ";
       for (const inc of includeList) {
-        const incN = norm(inc); if (!incN) continue;
-        if (tpad.includes(" " + incN + " ")) return true;
+        const incN = norm(inc); if (incN && tpad.includes(" " + incN + " ")) return true;
       }
       return false;
     }
@@ -632,7 +484,7 @@
       return false;
     }
 
-    // Brand pattern extraction (competitors) — "injury" removed from suffixes
+    // Brand pattern extraction (competitors) — injury removed from suffixes
     function extractCompetitorBrandTokens(term, myBrands, includeList) {
       const t = norm(term);
       const hits = new Set();
@@ -663,32 +515,19 @@
       return dedupe(hits);
     }
 
-    function findIncludes(term, includeList) {
-      const t = pad(term), hits = [];
-      for (const p of includeList) if (t.includes(pad(p))) hits.push(p);
-      return hits;
-    }
+    function findIncludes(term, includeList) { const t = pad(term), hits = []; for (const p of includeList) if (t.includes(pad(p))) hits.push(p); return hits; }
+    function findExcludes(term, excludeList) { const t = pad(term), hits = []; for (const p of excludeList) if (t.includes(pad(p))) hits.push(p); return hits; }
 
-    function findExcludes(term, excludeList) {
-      const t = pad(term), hits = [];
-      for (const p of excludeList) if (t.includes(pad(p))) hits.push(p);
-      return hits;
-    }
-
-    // Final safety filter for negatives
-    function shouldBlockNegativeToken(token, includeList, whitelist, hardProtect) {
+    // Final safety: block any token that equals/contains an in-scope or whitelist phrase
+    function shouldBlockNegativeToken(token, includeList, whitelist) {
       const t = norm(token); if (!t) return true; // drop empties
       const tpad = " " + t + " ";
-      // Whitelist wins
       for (const w of whitelist) { const wn = norm(w); if (wn && tpad.includes(" " + wn + " ")) return true; }
-      if (hardProtect) {
-        for (const inc of includeList) { const inN = norm(inc); if (inN && tpad.includes(" " + inN + " ")) return true; }
-      }
+      for (const inc of includeList) { const inN = norm(inc); if (inN && tpad.includes(" " + inN + " ")) return true; }
       return false;
     }
-
-    function finalizeNegatives(list, includeList, whitelist, hardProtect) {
-      const filtered = list.filter(tok => !shouldBlockNegativeToken(tok, includeList, whitelist, hardProtect));
+    function finalizeNegatives(list, includeList, whitelist) {
+      const filtered = list.filter(tok => !shouldBlockNegativeToken(tok, includeList, whitelist));
       return dedupe(filtered).map(toPhrase);
     }
 
@@ -709,7 +548,7 @@
         const incHits = includeList.length ? findIncludes(term, includeList) : [];
         const excHits = excludeList.length ? findExcludes(term, excludeList) : [];
 
-        // Optionally suppress comp/admin when include is present
+        // Optional: suppress comp/admin on in-scope terms
         const suppressCA = cfg.flags.suppressOnInclude && incHits.length > 0;
 
         // Competitors
@@ -734,7 +573,6 @@
         if (cfg.flags.nonpa) {
           let shouldNegate = false;
           const phrasesToAdd = [];
-
           if (excHits.length) { shouldNegate = true; phrasesToAdd.push(...excHits); }
           if (!incHits.length && !excHits.length && cfg.flags.strict) {
             if (!(cfg.flags.keepBranded && branded)) { shouldNegate = true; phrasesToAdd.push(term); }
@@ -743,10 +581,10 @@
         }
       }
 
-      // Finalize with safety filters and dedupe
-      const outCompetitors = finalizeNegatives(competitorNegs, includeList, whitelist, cfg.flags.hardProtect);
-      const outAdmin = finalizeNegatives(adminNegs, includeList, whitelist, cfg.flags.hardProtect);
-      const outNonPA = finalizeNegatives(nonPANegs, includeList, whitelist, cfg.flags.hardProtect);
+      // Finalize with absolute protection and whitelist across all categories
+      const outCompetitors = finalizeNegatives(competitorNegs, includeList, whitelist);
+      const outAdmin = finalizeNegatives(adminNegs, includeList, whitelist);
+      const outNonPA = finalizeNegatives(nonPANegs, includeList, whitelist);
 
       // Master union (already quoted/deduped)
       const master = dedupe([...outCompetitors, ...outAdmin, ...outNonPA]);
@@ -778,7 +616,6 @@
           nonpa: el.toggles.nonpa.checked,
           keepBranded: el.toggles.keepBranded.checked,
           strict: el.toggles.strict.checked,
-          hardProtect: el.toggles.hardProtect.checked,
           suppressOnInclude: el.toggles.suppressOnInclude.checked
         }
       };
@@ -866,6 +703,5 @@
 
     // Initialize chips on load
     updateMatchedChips(resolvePracticeKeys(el.practiceArea.value));
-  </script>
-</body>
+  </script></body>
 </html>
