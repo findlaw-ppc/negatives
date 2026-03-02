@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Law Firm Negative Keyword Generator</title>
@@ -121,7 +122,9 @@
     <div class="subtitle">
       Paste your Search Term Report, analyze intent, and export a clean list of phrase-match negatives: competitors, low-value admin queries, and non-practice-area terms.
     </div>
-  </header>  <main class="container grid">
+  </header>
+
+  <main class="container grid">
     <!-- LEFT: SETTINGS -->
     <section class="card">
       <h3>Campaign Context</h3>
@@ -131,161 +134,167 @@
           <input id="firmName" type="text" placeholder="e.g., Smith & Jones, The Smith Law Firm, Smith Law" />
           <div class="hint">Comma-separated. We’ll protect your brand terms from being negated.</div>
         </div>
-      </div>  <div class="row row-2 mt-12">
-    <div>
-      <label for="locations">Office locations</label>
-      <input id="locations" type="text" placeholder="e.g., Austin, Dallas, San Antonio" />
-      <div class="hint">Optional. Helps with city/agency noise patterns.</div>
-    </div>
-    <div>
-      <label for="practiceArea">Practice area(s)</label>
-      <input id="practiceArea" type="text" list="practiceAreaList" placeholder="e.g., Personal Injury, Criminal Defense" />
-      <datalist id="practiceAreaList">
-        <option value="Personal Injury"></option>
-        <option value="Family Law"></option>
-        <option value="Criminal Defense"></option>
-        <option value="Immigration"></option>
-        <option value="Employment Law"></option>
-        <option value="Estate Planning / Probate"></option>
-        <option value="Bankruptcy"></option>
-        <option value="Business / Corporate"></option>
-      </datalist>
-      <div class="hint">Type one or more (comma-separated). Known templates auto-fill include/exclude. You can still edit lists manually.</div>
-    </div>
-  </div>
-
-  <div class="mt-8" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-    <div class="toggle"><input id="autoFill" type="checkbox" checked /> Auto-fill include/exclude on change</div>
-    <div id="matchedChips" class="mt-8" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-  </div>
-
-  <div class="row mt-12">
-    <div>
-      <label for="includeKeywords">In-scope practice keywords (include)</label>
-      <textarea id="includeKeywords" placeholder="Comma-separated. e.g., personal injury, accident lawyer, car accident, slip and fall, wrongful death"></textarea>
-      <div class="hint">Any term containing one of these is in-scope and can never be suggested as a negative.</div>
-    </div>
-  </div>
-  <div class="row mt-12">
-    <div>
-      <label for="excludeKeywords">Out-of-scope practice keywords (exclude)</label>
-      <textarea id="excludeKeywords" placeholder="Auto-filled from template(s). Add any other practices you do not serve."></textarea>
-      <div class="hint">If a term includes any of these, we’ll recommend a Non-PA negative for that phrase.</div>
-    </div>
-  </div>
-
-  <div class="row mt-12">
-    <div>
-      <label for="whitelist">Never negate (whitelist)</label>
-      <textarea id="whitelist" placeholder="One or more phrases, comma-separated. These will never appear in negatives."></textarea>
-      <div class="hint">Extra safety for brand or sensitive phrases. Applied after all logic.</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3>Heuristics & Filters</h3>
-    <div class="row row-2">
-      <div>
-        <label>Competitor/Directory brands (preloaded)</label>
-        <div class="small">Avvo, Justia, FindLaw, Super Lawyers, Martindale, Nolo, Lawyers.com, LegalZoom, Rocket Lawyer, Yelp, Thumbtack, Angi, UpCounsel, Best Lawyers</div>
       </div>
-      <div>
-        <label>Administrative noise (preloaded)</label>
-        <div class="small">address, phone number, fax, directions, map, hours, login, portal, billing, payment, forms, PDF, application, jobs, careers, DMV, jail, inmate search, court, clerk, jury duty, legal aid, pro bono, free</div>
-      </div>
-    </div>
-    <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
-      <label class="toggle"><input id="toggleCompetitors" type="checkbox" checked /> Competitors</label>
-      <label class="toggle"><input id="toggleAdmin" type="checkbox" checked /> Low-value admin</label>
-      <label class="toggle"><input id="toggleNonPA" type="checkbox" checked /> Non-practice-area</label>
-      <label class="toggle"><input id="toggleKeepBranded" type="checkbox" checked /> Never negate my brand</label>
-      <label class="toggle"><input id="toggleStrict" type="checkbox" /> Strict non-PA (negate full unmatched queries)</label>
-    </div>
-    <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
-      <label class="toggle"><input id="toggleSuppressOnInclude" type="checkbox" /> Suppress competitor/admin if term matches in-scope</label>
-      <span class="small">Absolute protection of in-scope phrases is always ON.</span>
-    </div>
-  </div>
 
-  <details class="mt-12">
-    <summary>How it works (expand)</summary>
-    <ul class="small">
-      <li>Parses your Search Term Report (CSV/TSV or plain lines). We auto-pick the first text column.</li>
-      <li>Free-text practice areas: type one or more; we match synonyms to known templates and auto-fill include/exclude (optional).</li>
-      <li>Competitor extraction excludes generic practice phrases and your in-scope keywords, so practice terms never become competitor negatives.</li>
-      <li>Safety: Any negative candidate that equals/contains an in-scope phrase or a whitelist term is removed from all outputs.</li>
-      <li>Non-PA: Exclude hits add negatives; Strict negates unmatched full queries (unless brand-protected).</li>
-    </ul>
-  </details>
-</section>
-
-<!-- RIGHT: INPUT + OUTPUT -->
-<section class="card">
-  <h3>Search Term Report</h3>
-  <label for="terms">Paste terms (one per line, CSV/TSV OK)</label>
-  <textarea id="terms" placeholder="Paste your Search Term Report here..."></textarea>
-  <div class="btn-row mt-8">
-    <button class="btn" id="analyzeBtn">Analyze & Generate Negatives</button>
-    <button class="btn secondary" id="sampleBtn">Load Sample</button>
-    <button class="btn secondary" id="clearBtn">Clear</button>
-  </div>
-
-  <div class="legend">
-    <span class="chip green"><span class="dot"></span> Competitors</span>
-    <span class="chip yellow"><span class="dot"></span> Admin</span>
-    <span class="chip red"><span class="dot"></span> Non-PA</span>
-    <span class="chip cyan"><span class="dot"></span> All (deduped)</span>
-  </div>
-
-  <div class="section">
-    <div class="statline" id="stats"></div>
-    <div class="row row-2 mt-8">
-      <div>
-        <label>Master negative list (phrase-match)</label>
-        <textarea id="outAll" class="out" readonly></textarea>
-        <div class="btn-row mt-8">
-          <button class="btn" data-copy="#outAll">Copy all</button>
-          <button class="btn secondary" data-download="#outAll" data-name="negatives-all.txt">Download</button>
-          <button class="btn secondary" data-download-csv="#outAll" data-name="negatives-all.csv">Download CSV</button>
-          <span class="chip cyan"><span class="dot"></span> Deduped</span>
+      <div class="row row-2 mt-12">
+        <div>
+          <label for="locations">Office locations</label>
+          <input id="locations" type="text" placeholder="e.g., Austin, Dallas, San Antonio" />
+          <div class="hint">Optional. Helps with city/agency noise patterns.</div>
+        </div>
+        <div>
+          <label for="practiceArea">Practice area(s)</label>
+          <input id="practiceArea" type="text" list="practiceAreaList" placeholder="e.g., Personal Injury, Criminal Defense" />
+          <datalist id="practiceAreaList">
+            <option value="Personal Injury"></option>
+            <option value="Family Law"></option>
+            <option value="Criminal Defense"></option>
+            <option value="Immigration"></option>
+            <option value="Employment Law"></option>
+            <option value="Estate Planning / Probate"></option>
+            <option value="Bankruptcy"></option>
+            <option value="Business / Corporate"></option>
+          </datalist>
+          <div class="hint">Type one or more (comma-separated). Known templates auto-fill include/exclude. You can still edit lists manually.</div>
         </div>
       </div>
-      <div>
-        <label>Competitors</label>
-        <textarea id="outCompetitors" class="out" readonly></textarea>
-        <div class="btn-row mt-8">
-          <button class="btn" data-copy="#outCompetitors">Copy</button>
-          <button class="btn secondary" data-download="#outCompetitors" data-name="negatives-competitors.txt">Download</button>
-          <span class="chip green"><span class="dot"></span> Brand/Directory</span>
-        </div>
-      </div>
-    </div>
 
-    <div class="row row-2 mt-8">
-      <div>
-        <label>Low-value administrative</label>
-        <textarea id="outAdmin" class="out" readonly></textarea>
-        <div class="btn-row mt-8">
-          <button class="btn" data-copy="#outAdmin">Copy</button>
-          <button class="btn secondary" data-download="#outAdmin" data-name="negatives-admin.txt">Download</button>
-          <span class="chip yellow"><span class="dot"></span> Admin intent</span>
+      <div class="mt-8" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="toggle"><input id="autoFill" type="checkbox" checked /> Auto-fill include/exclude on change</div>
+        <div id="matchedChips" class="mt-8" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="row mt-12">
+        <div>
+          <label for="includeKeywords">In-scope practice keywords (include)</label>
+          <textarea id="includeKeywords" placeholder="Comma-separated. e.g., personal injury, accident lawyer, car accident, slip and fall, wrongful death"></textarea>
+          <div class="hint">Any term containing one of these is in-scope and can never be suggested as a negative.</div>
         </div>
       </div>
-      <div>
-        <label>Non-practice-area</label>
-        <textarea id="outNonPA" class="out" readonly></textarea>
-        <div class="btn-row mt-8">
-          <button class="btn" data-copy="#outNonPA">Copy</button>
-          <button class="btn secondary" data-download="#outNonPA" data-name="negatives-nonpa.txt">Download</button>
-          <span class="chip red"><span class="dot"></span> Out of scope</span>
+      <div class="row mt-12">
+        <div>
+          <label for="excludeKeywords">Out-of-scope practice keywords (exclude)</label>
+          <textarea id="excludeKeywords" placeholder="Auto-filled from template(s). Add any other practices you do not serve."></textarea>
+          <div class="hint">If a term includes any of these, we’ll recommend a Non-PA negative for that phrase.</div>
         </div>
       </div>
-    </div>
+
+      <div class="row mt-12">
+        <div>
+          <label for="whitelist">Never negate (whitelist)</label>
+          <textarea id="whitelist" placeholder="One or more phrases, comma-separated. These will never appear in negatives."></textarea>
+          <div class="hint">Extra safety for brand or sensitive phrases. Applied after all logic.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Heuristics & Filters</h3>
+        <div class="row row-2">
+          <div>
+            <label>Competitor/Directory brands (preloaded)</label>
+            <div class="small">Avvo, Justia, FindLaw, Super Lawyers, Martindale, Nolo, Lawyers.com, LegalZoom, Rocket Lawyer, Yelp, Thumbtack, Angi, UpCounsel, Best Lawyers</div>
+          </div>
+          <div>
+            <label>Administrative noise (preloaded)</label>
+            <div class="small">address, phone number, fax, directions, map, hours, login, portal, billing, payment, forms, PDF, application, jobs, careers, DMV, jail, inmate search, court, clerk, jury duty, legal aid, pro bono, free</div>
+          </div>
+        </div>
+        <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
+          <label class="toggle"><input id="toggleCompetitors" type="checkbox" checked /> Competitors</label>
+          <label class="toggle"><input id="toggleAdmin" type="checkbox" checked /> Low-value admin</label>
+          <label class="toggle"><input id="toggleNonPA" type="checkbox" checked /> Non-practice-area</label>
+          <label class="toggle"><input id="toggleKeepBranded" type="checkbox" checked /> Never negate my brand</label>
+          <label class="toggle"><input id="toggleStrict" type="checkbox" /> Strict non-PA (negate full unmatched queries)</label>
+        </div>
+        <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap;">
+          <label class="toggle"><input id="toggleSuppressOnInclude" type="checkbox" /> Suppress competitor/admin if term matches in-scope</label>
+          <span class="small">Absolute protection of in-scope phrases is always ON.</span>
+        </div>
+      </div>
+
+      <details class="mt-12">
+        <summary>How it works (expand)</summary>
+        <ul class="small">
+          <li>Parses your Search Term Report (CSV/TSV or plain lines). We auto-pick the first text column.</li>
+          <li>Free-text practice areas: type one or more; we match synonyms to known templates and auto-fill include/exclude (optional).</li>
+          <li>Competitor extraction excludes generic practice phrases and your in-scope keywords, so practice terms never become competitor negatives.</li>
+          <li>Safety: Any negative candidate that equals/contains an in-scope phrase or a whitelist term is removed from all outputs.</li>
+          <li>Non-PA: Exclude hits add negatives; Strict negates unmatched full queries (unless brand-protected).</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- RIGHT: INPUT + OUTPUT -->
+    <section class="card">
+      <h3>Search Term Report</h3>
+      <label for="terms">Paste terms (one per line, CSV/TSV OK)</label>
+      <textarea id="terms" placeholder="Paste your Search Term Report here..."></textarea>
+      <div class="btn-row mt-8">
+        <button class="btn" id="analyzeBtn">Analyze & Generate Negatives</button>
+        <button class="btn secondary" id="sampleBtn">Load Sample</button>
+        <button class="btn secondary" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="legend">
+        <span class="chip green"><span class="dot"></span> Competitors</span>
+        <span class="chip yellow"><span class="dot"></span> Admin</span>
+        <span class="chip red"><span class="dot"></span> Non-PA</span>
+        <span class="chip cyan"><span class="dot"></span> All (deduped)</span>
+      </div>
+
+      <div class="section">
+        <div class="statline" id="stats"></div>
+        <div class="row row-2 mt-8">
+          <div>
+            <label>Master negative list (phrase-match)</label>
+            <textarea id="outAll" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outAll">Copy all</button>
+              <button class="btn secondary" data-download="#outAll" data-name="negatives-all.txt">Download</button>
+              <button class="btn secondary" data-download-csv="#outAll" data-name="negatives-all.csv">Download CSV</button>
+              <span class="chip cyan"><span class="dot"></span> Deduped</span>
+            </div>
+          </div>
+          <div>
+            <label>Competitors</label>
+            <textarea id="outCompetitors" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outCompetitors">Copy</button>
+              <button class="btn secondary" data-download="#outCompetitors" data-name="negatives-competitors.txt">Download</button>
+              <span class="chip green"><span class="dot"></span> Brand/Directory</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-2 mt-8">
+          <div>
+            <label>Low-value administrative</label>
+            <textarea id="outAdmin" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outAdmin">Copy</button>
+              <button class="btn secondary" data-download="#outAdmin" data-name="negatives-admin.txt">Download</button>
+              <span class="chip yellow"><span class="dot"></span> Admin intent</span>
+            </div>
+          </div>
+          <div>
+            <label>Non-practice-area</label>
+            <textarea id="outNonPA" class="out" readonly></textarea>
+            <div class="btn-row mt-8">
+              <button class="btn" data-copy="#outNonPA">Copy</button>
+              <button class="btn secondary" data-download="#outNonPA" data-name="negatives-nonpa.txt">Download</button>
+              <span class="chip red"><span class="dot"></span> Out of scope</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-note container">
+    Tip: If you type a practice area, you can immediately click Analyze—your include/exclude lists are now synced automatically.
   </div>
-</section>
-  </main>  <div class="footer-note container">
-    Tip: Keep Auto-fill on to populate in-scope/exclude phrases; absolute protection + whitelist ensure your practice terms are never negated.
-  </div>  <script>
+
+  <script>
     // Utility helpers
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -313,7 +322,9 @@
     const GENERIC_PRACTICE_PREFIXES = [
       "personal","family","criminal","immigration","employment","estate",
       "bankruptcy","business","corporate","association","bar","referral",
-      "county","city","state","national","federal","public"
+      "county","city","state","national","federal","public",
+      // added for extra safety
+      "accident","injury","divorce","dui","dwi","probate","will","trust","malpractice","lemon","workers","comp","ssd","ssi"
     ];
 
     // Practice templates, labels, synonyms
@@ -602,7 +613,13 @@
       el.stats.innerHTML = parts.join(" ");
     }
 
+    // Ensure practice area auto-fill is applied before reading config
+    function syncPracticeBeforeAnalyze() {
+      onPracticeAreaChange(); // applies templates if Auto-fill is on
+    }
+
     function runAnalyze() {
+      syncPracticeBeforeAnalyze(); // NEW: always sync
       const terms = parseLines(el.terms.value);
       const cfg = {
         firmName: el.firmName.value,
@@ -666,7 +683,7 @@
       onPracticeAreaChange();
       el.includeKeywords.value = PRACTICE_TEMPLATES.personalInjury.include.join(", ");
       el.excludeKeywords.value = PRACTICE_TEMPLATES.personalInjury.exclude.join(", ");
-      el.whitelist.value = "personal injury, family law"; // demo safety
+      el.whitelist.value = "personal injury, accident lawyer, car accident, family law"; // demo safety
       el.terms.value =
 `"Search term","Clicks","Impr."
 "smith law phone number",2,34
@@ -703,5 +720,6 @@
 
     // Initialize chips on load
     updateMatchedChips(resolvePracticeKeys(el.practiceArea.value));
-  </script></body>
+  </script>
+</body>
 </html>
