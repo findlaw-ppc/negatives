@@ -247,12 +247,18 @@
         <div class="row row-2 mt-8">
           <div>
             <label>Master negative list (phrase-match)</label>
-            <textarea id="outAll" class="out" readonly></textarea>
+            <!-- Editable master list -->
+            <textarea id="outAll" class="out" placeholder="Your master list will appear here. You can edit it directly."></textarea>
             <div class="btn-row mt-8">
               <button class="btn" data-copy="#outAll">Copy all</button>
               <button class="btn secondary" data-download="#outAll" data-name="negatives-all.txt">Download</button>
               <button class="btn secondary" data-download-csv="#outAll" data-name="negatives-all.csv">Download CSV</button>
-              <span class="chip cyan"><span class="dot"></span> Deduped</span>
+              <button class="btn secondary" id="cleanSortBtn" title="Re-quote, dedupe, (optionally safety-check), and sort A→Z">Clean & Sort</button>
+            </div>
+            <div class="mt-8" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+              <label class="toggle"><input id="autoSortAll" type="checkbox" checked /> Auto-sort A→Z on Analyze</label>
+              <label class="toggle"><input id="safetyOnClean" type="checkbox" checked /> Safety check on Clean & Sort</label>
+              <span class="hint">Edits here persist until you click Analyze again (which regenerates the list).</span>
             </div>
           </div>
           <div>
@@ -291,13 +297,15 @@
   </main>
 
   <div class="footer-note container">
-    Tip: If you type a practice area, you can immediately click Analyze—your include/exclude lists are now synced automatically.
+    Tip: Use Clean & Sort after manual edits to re-quote, dedupe, and alphabetize (with optional safety check).
   </div>
 
   <script>
     // Utility helpers
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const norm = s => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+    const pad = s => " " + norm(s) + " ";
 
     // Preloaded dictionaries
     const DIR_AGG_BRANDS = [
@@ -305,7 +313,6 @@
       "legalzoom","rocket lawyer","upcounsel","thumbtack","angi","angie's list","yelp","superlawyers",
       "attorneys.com","legalmatch","hg.org","lawinfo","no win no fee"
     ];
-
     const ADMIN_PHRASES = [
       "address","phone number","fax","directions","map","parking","hours","opening hours","closing time",
       "email","contact number","contact info","contact information","login","portal","intranet","portal login",
@@ -323,7 +330,7 @@
       "personal","family","criminal","immigration","employment","estate",
       "bankruptcy","business","corporate","association","bar","referral",
       "county","city","state","national","federal","public",
-      // added for extra safety
+      // extra safety
       "accident","injury","divorce","dui","dwi","probate","will","trust","malpractice","lemon","workers","comp","ssd","ssi"
     ];
 
@@ -369,6 +376,9 @@
       outAdmin: $("#outAdmin"),
       outNonPA: $("#outNonPA"),
       stats: $("#stats"),
+      autoSortAll: $("#autoSortAll"),
+      safetyOnClean: $("#safetyOnClean"),
+      cleanSortBtn: $("#cleanSortBtn"),
       toggles: {
         competitors: $("#toggleCompetitors"),
         admin: $("#toggleAdmin"),
@@ -380,12 +390,21 @@
     };
 
     // Helpers
-    const norm = s => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
-    const pad = s => " " + norm(s) + " ";
-
     function csvToList(s) { return (s || "").split(",").map(x => norm(x)).filter(Boolean); }
+    function unique(arr) { return Array.from(new Set(arr.map(x => norm(x)))).filter(Boolean); }
+    function toPhrase(kw) { kw = norm(kw).replace(/["]+/g, ""); return kw ? `"${kw}"` : ""; }
+    function dedupe(list) { return Array.from(new Set(list.map(x => norm(x)))).filter(Boolean); }
+    function containsPhrase(term, phrase) { return pad(term).includes(pad(phrase)); }
+    function sortQuotedAlpha(list) {
+      // sort by inner token, case-insensitive
+      return [...list].sort((a,b) => {
+        const x = (a || "").replace(/^"+|"+$/g,"");
+        const y = (b || "").replace(/^"+|"+$/g,"");
+        return x.localeCompare(y, undefined, { sensitivity: "base" });
+      });
+    }
 
-    // Resolve practice areas
+    // Practice area helpers
     function resolvePracticeKeys(input) {
       const tokens = (input || "").split(",").map(norm).filter(Boolean);
       const keys = new Set();
@@ -398,9 +417,6 @@
       }
       return Array.from(keys);
     }
-
-    function unique(arr) { return Array.from(new Set(arr.map(x => norm(x)))).filter(Boolean); }
-
     function applyPracticeTemplates(keys) {
       if (!keys.length) return;
       const include = [], exclude = [];
@@ -408,12 +424,10 @@
       el.includeKeywords.value = unique(include).join(", ");
       el.excludeKeywords.value = unique(exclude).join(", ");
     }
-
     function updateMatchedChips(keys) {
       if (!keys.length) { el.matchedChips.innerHTML = '<span class="small">No recognized templates yet. You can still edit include/exclude manually.</span>'; return; }
       el.matchedChips.innerHTML = keys.map(k => `<span class="chip"><span class="dot" style="background:var(--cyan)"></span>${PRACTICE_LABELS[k] || k}</span>`).join(" ");
     }
-
     function onPracticeAreaChange() {
       const keys = resolvePracticeKeys(el.practiceArea.value);
       updateMatchedChips(keys);
@@ -452,7 +466,6 @@
       }
       return out;
     }
-
     function detectSeparator(lines) {
       const sample = lines.slice(0, Math.min(5, lines.length));
       const counts = { ",": 0, "\t": 0, ";": 0, "|": 0 };
@@ -460,7 +473,6 @@
       const best = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
       return best && best[1] > 0 ? best[0] : null;
     }
-
     function splitRow(line, sep) {
       if (!sep) return [line];
       const parts = []; let cur = ""; let inQ = false;
@@ -473,10 +485,6 @@
       return parts;
     }
 
-    function containsPhrase(term, phrase) { return pad(term).includes(pad(phrase)); }
-    function dedupe(list) { return Array.from(new Set(list.map(x => norm(x)))).filter(Boolean); }
-    function toPhrase(kw) { kw = norm(kw).replace(/["]+/g, ""); return kw ? `"${kw}"` : ""; }
-
     // Safety predicates
     function looksGenericBrand(token, includeList = []) {
       const t = norm(token); if (!t) return true;
@@ -488,14 +496,13 @@
       }
       return false;
     }
-
     function isMyBrand(term, myBrands) {
       const t = pad(term);
       for (const b of myBrands) if (t.includes(pad(b))) return true;
       return false;
     }
 
-    // Brand pattern extraction (competitors) — injury removed from suffixes
+    // Brand pattern extraction (competitors) — tightened
     function extractCompetitorBrandTokens(term, myBrands, includeList) {
       const t = norm(term);
       const hits = new Set();
@@ -503,7 +510,7 @@
       // Directories/aggregators
       for (const b of DIR_AGG_BRANDS) if (containsPhrase(t, b)) hits.add(b);
 
-      // Firm-name patterns (tightened)
+      // Firm-name patterns
       const patterns = [
         /\blaw offices of ([a-z][a-z\s&'-]{2,})\b/i,
         /\b([a-z][a-z&'\-]{2,}\s+(?:law|legal|attorneys?|lawyers?|trial|group|associates))\b/i,
@@ -525,7 +532,6 @@
       if (/\b(bill|pay|payment)\b/.test(t) && /\b(online|portal)?\b/.test(t)) hits.push("online payment");
       return dedupe(hits);
     }
-
     function findIncludes(term, includeList) { const t = pad(term), hits = []; for (const p of includeList) if (t.includes(pad(p))) hits.push(p); return hits; }
     function findExcludes(term, excludeList) { const t = pad(term), hits = []; for (const p of excludeList) if (t.includes(pad(p))) hits.push(p); return hits; }
 
@@ -559,7 +565,6 @@
         const incHits = includeList.length ? findIncludes(term, includeList) : [];
         const excHits = excludeList.length ? findExcludes(term, excludeList) : [];
 
-        // Optional: suppress comp/admin on in-scope terms
         const suppressCA = cfg.flags.suppressOnInclude && incHits.length > 0;
 
         // Competitors
@@ -592,12 +597,11 @@
         }
       }
 
-      // Finalize with absolute protection and whitelist across all categories
-      const outCompetitors = finalizeNegatives(competitorNegs, includeList, whitelist);
-      const outAdmin = finalizeNegatives(adminNegs, includeList, whitelist);
-      const outNonPA = finalizeNegatives(nonPANegs, includeList, whitelist);
+      const outCompetitors = finalizeNegatives(competitorNegs, csvToList(cfg.includeKeywords), csvToList(cfg.whitelist));
+      const outAdmin = finalizeNegatives(adminNegs, csvToList(cfg.includeKeywords), csvToList(cfg.whitelist));
+      const outNonPA = finalizeNegatives(nonPANegs, csvToList(cfg.includeKeywords), csvToList(cfg.whitelist));
 
-      // Master union (already quoted/deduped)
+      // Master union
       const master = dedupe([...outCompetitors, ...outAdmin, ...outNonPA]);
 
       return { competitors: outCompetitors, admin: outAdmin, nonpa: outNonPA, master };
@@ -613,13 +617,11 @@
       el.stats.innerHTML = parts.join(" ");
     }
 
-    // Ensure practice area auto-fill is applied before reading config
-    function syncPracticeBeforeAnalyze() {
-      onPracticeAreaChange(); // applies templates if Auto-fill is on
-    }
-
+    // Analyze
     function runAnalyze() {
-      syncPracticeBeforeAnalyze(); // NEW: always sync
+      // Ensure practice area auto-fill is applied before reading config
+      onPracticeAreaChange();
+
       const terms = parseLines(el.terms.value);
       const cfg = {
         firmName: el.firmName.value,
@@ -638,12 +640,38 @@
       };
 
       const result = buildNegatives(terms, cfg);
-      el.outAll.value = result.master.join("\n");
+
+      // Sort master A→Z if enabled
+      const master = el.autoSortAll.checked ? sortQuotedAlpha(result.master) : result.master;
+
+      el.outAll.value = master.join("\n");
       el.outCompetitors.value = result.competitors.join("\n");
       el.outAdmin.value = result.admin.join("\n");
       el.outNonPA.value = result.nonpa.join("\n");
 
       updateStats(result, { total: terms.length });
+    }
+
+    // Clean & Sort for manual edits
+    function cleanAndSortMaster(enforceSafety = true) {
+      // Read current editor content
+      let lines = el.outAll.value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      // Normalize to tokens (no quotes), lowercase for consistency
+      let tokens = lines.map(l => l.replace(/^"+|"+$/g,"")).map(norm).filter(Boolean);
+
+      // Optional safety: remove anything that equals/contains in-scope or whitelist
+      if (enforceSafety) {
+        const includeList = csvToList(el.includeKeywords.value);
+        const whitelist = csvToList(el.whitelist.value);
+        tokens = tokens.filter(tok => !shouldBlockNegativeToken(tok, includeList, whitelist));
+      }
+
+      // Dedupe and sort
+      tokens = Array.from(new Set(tokens));
+      tokens.sort((a,b) => a.localeCompare(b));
+
+      // Re-quote for phrase match
+      el.outAll.value = tokens.map(toPhrase).join("\n");
     }
 
     // Copy/download helpers
@@ -671,6 +699,8 @@
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
+    // Event bindings
+    el.cleanSortBtn.addEventListener("click", () => cleanAndSortMaster(el.safetyOnClean.checked));
     $$("[data-copy]").forEach(btn => btn.addEventListener("click", () => copyTextFrom(btn.getAttribute("data-copy"))));
     $$("[data-download]").forEach(btn => btn.addEventListener("click", () => downloadTextFrom(btn.getAttribute("data-download"), btn.getAttribute("data-name"))));
     $$("[data-download-csv]").forEach(btn => btn.addEventListener("click", () => downloadCSVFrom(btn.getAttribute("data-download-csv"), btn.getAttribute("data-name"))));
